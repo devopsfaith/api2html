@@ -18,8 +18,7 @@ deps:
 	@echo ""
 
 test:
-	go test -cover -v .
-	go vet ./...
+	go test -cover -v ./...
 
 build:
 	@echo "Building the binary..."
