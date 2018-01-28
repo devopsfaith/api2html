@@ -20,6 +20,7 @@ type Collector interface {
 // ErrNoConfig is the error to be returned if there are no config files
 var ErrNoConfig = fmt.Errorf("no config files")
 
+// Data contains all the collected data
 type Data struct {
 	I18N   map[string]Map
 	Config map[string]Map
