@@ -1,1 +1,10 @@
-.travis.yml
+language: go
+
+go:
+  - 1.9
+
+before_install:
+  - make prepare
+
+script:
+  - make
