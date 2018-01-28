@@ -30,7 +30,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			start := time.Now()
 
-			if err := generator.NewGenerator(basePath, ignoreRegex).Generate(isos); err != nil {
+			if err := generator.New(basePath, ignoreRegex).Generate(isos); err != nil {
 				log.Println("generation aborted:", err.Error())
 				return
 			}

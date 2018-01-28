@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func NewGenerator(basePath, ignoreRegex string) Generator {
+func New(basePath, ignoreRegex string) Generator {
 	return Generator{
 		SourceFolder:     fmt.Sprintf("%s/sources", basePath),
 		ConfigFolder:     fmt.Sprintf("%s/config", basePath),
