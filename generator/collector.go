@@ -11,11 +11,13 @@ import (
 	"github.com/Unknwon/goconfig"
 )
 
+// Collector defines the interface for collecting config and translation data
 type Collector interface {
 	Collect(string) (Data, error)
 	AvailableISOs() []string
 }
 
+// ErrNoConfig is the error to be returned if there are no config files
 var ErrNoConfig = fmt.Errorf("no config files")
 
 type Data struct {
