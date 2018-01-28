@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/cbroglie/mustache"
   packages = ["."]
-  revision = "6b01858ec889c7240e02d553d42c238afbb62eac"
+  revision = "2eb171290cbdc792c57bcd10f5a030b53500b28f"
 
 [[projects]]
   branch = "master"
@@ -33,7 +33,7 @@
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
 
 [[projects]]
   branch = "master"
@@ -66,16 +66,16 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
+  version = "v1.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "2c42eef0765b9837fbdab12011af7830f55f88f0"
+  revision = "ff2a66f350cefa5c93a634eadb5d25bb60c85a9c"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -92,6 +92,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7855197adeb5b92aa0f7aad6f33ab833a42383725ceb6f95f9c265e54169bd5b"
+  inputs-digest = "42066840f284de070ceca4285f31df61eabbf1a383ad5aba1d8852c317a02372"
   solver-name = "gps-cdcl"
   solver-version = 1
