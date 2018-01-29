@@ -1,19 +1,57 @@
-api2html
-====
 
-Template Render as a Service
+![api2html](https://raw.githubusercontent.com/devopsfaith/api2html.com/master/img/API2HTML-on-white.png)
 
-## Dependencies
+### On the fly HTML generator from API data
 
-Dependencies are managed by `dep`. Install it with:
+API2HTML is a web server that renders [Moustache](http://mustache.github.io/) templates and injects them your API data. This allows you to build websites by just declaring the API sources and writing the template view.
+
+## How does it work?
+To create pages that feed from a backend you just need to add in the configuration file the URL patterns the server will listen to. Let's imagine we want to offer URLs like `/products/13-inches-laptop` where the second part is a variable that will be sent to the API:
+
+	...
+	"pages":[
+			{
+				"name": "products",
+				"URLPattern": "/products/:category",
+				"BackendURLPattern": "http://api.company.com/products/:category",
+				"Template": "products_list",
+				"CacheTTL": "3600s",
+				"extra": {
+					"some_more_data":"This will be available in the template as {{extra.some_more_data}}"
+				}
+			},
+			...
+
+Now in the declared template `products_list.tmpl` you could use the response from the backend as follows:
+
+	<h1>Products for sale</h1>
+	<table>
+	    {{#data}}
+	    	<tr>
+				<td>{{name}}</td>
+				<td>{{price}}</td>
+			</tr>
+	    {{/data}}
+
+	    {{^data}}
+	       <tr>
+	       		<td colspan="2">There are no products in this category</td>
+	       	</tr>
+	    {{/data}}
+    </table>
+
+## Install
+
+When you install `api2html` for the first time you need to download the dependencies, automatically managed by `dep`. Install it with:
 
 	$ make prepare
 
-## Build
+Once all dependencies are installed just run:
 
 	$ make
 
 ## Run
+Once you have successfully compiled API2HTML in your platform the binary `api2html` will exist in the folder. Execute it as follows:
 
 	$ ./api2html -h
 	Template Render As A Service
@@ -27,7 +65,7 @@ Dependencies are managed by `dep`. Install it with:
 
 	Use "api2html [command] --help" for more information about a command.
 
-## Run the engine
+### Run the engine
 
 	$ ./api2html run -h
 	Run the api2html server.
@@ -46,7 +84,8 @@ Dependencies are managed by `dep`. Install it with:
 	  -c, --config string   Path to the configuration filename (default "config.json")
 	  -d, --devel           Enable the devel
 
-## Generator
+### Generator
+The generator allows you to create multiple moustache files using templating. That's right create templates with templates!
 
 	$ ./api2html generate -h
 	Generate the final api2html templates.
@@ -66,15 +105,16 @@ Dependencies are managed by `dep`. Install it with:
 	  -p, --path string   Base path for the generation (default ".")
 	  -r, --reg string    regex filtering the sources to move to the output folder (default "ignore")
 
-## Hot template reload
+### Hot template reload
 
 	$ curl -X PUT -F "file=@/path/to/tmpl.mustache" -H "Content-Type: multipart/form-data" \
 	http://localhost:8080/template/<TEMPLATE_NAME>
 
-## Docker build
+## Building and running with Docker
+To build the project with Docker:
 
 	$ make docker
 
-## Docker run
+And run it as follows:
 
 	$ docker run -it --rm -p8080:8080 -v $PWD/config.json:/etc/api2html/config.json api2html -d -c /etc/api2html/config.json
