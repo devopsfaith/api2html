@@ -3,7 +3,7 @@
 
 ### On the fly HTML generator from API data
 
-API2HTML is a web server that renders [Moustache](http://mustache.github.io/) templates and injects them your API data. This allows you to build websites by just declaring the API sources and writing the template view.
+API2HTML is a web server that renders [Mustache](http://mustache.github.io/) templates and injects them your API data. This allows you to build websites by just declaring the API sources and writing the template view.
 
 ## How does it work?
 To create pages that feed from a backend you just need to add in the configuration file the URL patterns the server will listen to. Let's imagine we want to offer URLs like `/products/13-inches-laptops` where the second part is a variable that will be sent to the API:
@@ -98,7 +98,7 @@ Once you have successfully compiled API2HTML in your platform the binary `api2ht
       -d, --devel           Enable the devel
 
 ### Generator
-The generator allows you to create multiple moustache files using templating. That's right create templates with templates!
+The generator allows you to create multiple mustache files using templating. That's right create templates with templates!
 
     $ ./api2html generate -h
     Generate the final api2html templates.
