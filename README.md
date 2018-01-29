@@ -6,115 +6,128 @@
 API2HTML is a web server that renders [Moustache](http://mustache.github.io/) templates and injects them your API data. This allows you to build websites by just declaring the API sources and writing the template view.
 
 ## How does it work?
-To create pages that feed from a backend you just need to add in the configuration file the URL patterns the server will listen to. Let's imagine we want to offer URLs like `/products/13-inches-laptop` where the second part is a variable that will be sent to the API:
+To create pages that feed from a backend you just need to add in the configuration file the URL patterns the server will listen to. Let's imagine we want to offer URLs like `/products/13-inches-laptops` where the second part is a variable that will be sent to the API:
 
-	...
-	"pages":[
-			{
-				"name": "products",
-				"URLPattern": "/products/:category",
-				"BackendURLPattern": "http://api.company.com/products/:category",
-				"Template": "products_list",
-				"CacheTTL": "3600s",
-				"extra": {
-					"some_more_data":"This will be available in the template as {{extra.some_more_data}}"
-				}
-			},
-			...
+    ...
+    "pages":[
+    {
+        "name": "products",
+        "URLPattern": "/products/:category",
+        "BackendURLPattern": "http://api.company.com/products/:category",
+        "Template": "products_list",
+        "CacheTTL": "3600s",
+        "extra": {
+            "promo":"Black Friday"
+        }
+    },
+    ...
 
-Now in the declared template `products_list.tmpl` you could use the response from the backend as follows:
+Now in the declared template `products_list.tmpl` you could use the response from the backend under the variable `data` as follows:
 
-	<h1>Products for sale</h1>
-	<table>
-	    {{#data}}
-	    	<tr>
-				<td>{{name}}</td>
-				<td>{{price}}</td>
-			</tr>
-	    {{/data}}
+    <h1>Products for sale</h1>
+    <p>Take advantage of the {{extra.promo}}!</p>
+    <table>
+        {{#data}}
+            <tr>
+                <td>{{name}}</td>
+                <td>{{price}}</td>
+            </tr>
+        {{/data}}
 
-	    {{^data}}
-	       <tr>
-	       		<td colspan="2">There are no products in this category</td>
-	       	</tr>
-	    {{/data}}
+        {{^data}}
+           <tr>
+                <td colspan="2">There are no products in this category</td>
+            </tr>
+        {{/data}}
     </table>
+
+You probably guessed it already, but in this scenario the backend would be returning a response like this:
+
+    // http://api.company.com/products/13-inches-laptops
+    {
+        [
+            { "name": "13-inch MacBook Air", "price": "$999.00" },
+            { "name": "Lenovo ThinkPad 13", "price": "$752.00" },
+            { "name": "Dell XPS13", "price": "$925.00" }
+        ]
+    }
+
 
 ## Install
 
 When you install `api2html` for the first time you need to download the dependencies, automatically managed by `dep`. Install it with:
 
-	$ make prepare
+    $ make prepare
 
 Once all dependencies are installed just run:
 
-	$ make
+    $ make
 
 ## Run
 Once you have successfully compiled API2HTML in your platform the binary `api2html` will exist in the folder. Execute it as follows:
 
-	$ ./api2html -h
-	Template Render As A Service
+    $ ./api2html -h
+    Template Render As A Service
 
-	Usage:
-	  api2html [command]
+    Usage:
+      api2html [command]
 
-	Available Commands:
-	  generate    Generate the final api2html templates.
-	  serve       Run the api2html server.
+    Available Commands:
+      generate    Generate the final api2html templates.
+      serve       Run the api2html server.
 
-	Use "api2html [command] --help" for more information about a command.
+    Use "api2html [command] --help" for more information about a command.
 
 ### Run the engine
 
-	$ ./api2html run -h
-	Run the api2html server.
+    $ ./api2html run -h
+    Run the api2html server.
 
-	Usage:
-	  api2html serve [flags]
+    Usage:
+      api2html serve [flags]
 
-	Aliases:
-	  serve, run, server, start
+    Aliases:
+      serve, run, server, start
 
 
-	Examples:
-	api2html serve -d -c config.json
+    Examples:
+    api2html serve -d -c config.json
 
-	Flags:
-	  -c, --config string   Path to the configuration filename (default "config.json")
-	  -d, --devel           Enable the devel
+    Flags:
+      -c, --config string   Path to the configuration filename (default "config.json")
+      -d, --devel           Enable the devel
 
 ### Generator
 The generator allows you to create multiple moustache files using templating. That's right create templates with templates!
 
-	$ ./api2html generate -h
-	Generate the final api2html templates.
+    $ ./api2html generate -h
+    Generate the final api2html templates.
 
-	Usage:
-	  api2html generate [flags]
+    Usage:
+      api2html generate [flags]
 
-	Aliases:
-	  generate, create, new
+    Aliases:
+      generate, create, new
 
 
-	Examples:
-	api2html generate -d -c config.json
+    Examples:
+    api2html generate -d -c config.json
 
-	Flags:
-	  -i, --iso string    (comma-separated) iso code of the site to create (default "*")
-	  -p, --path string   Base path for the generation (default ".")
-	  -r, --reg string    regex filtering the sources to move to the output folder (default "ignore")
+    Flags:
+      -i, --iso string    (comma-separated) iso code of the site to create (default "*")
+      -p, --path string   Base path for the generation (default ".")
+      -r, --reg string    regex filtering the sources to move to the output folder (default "ignore")
 
 ### Hot template reload
 
-	$ curl -X PUT -F "file=@/path/to/tmpl.mustache" -H "Content-Type: multipart/form-data" \
-	http://localhost:8080/template/<TEMPLATE_NAME>
+    $ curl -X PUT -F "file=@/path/to/tmpl.mustache" -H "Content-Type: multipart/form-data" \
+    http://localhost:8080/template/<TEMPLATE_NAME>
 
 ## Building and running with Docker
 To build the project with Docker:
 
-	$ make docker
+    $ make docker
 
 And run it as follows:
 
-	$ docker run -it --rm -p8080:8080 -v $PWD/config.json:/etc/api2html/config.json api2html -d -c /etc/api2html/config.json
+    $ docker run -it --rm -p8080:8080 -v $PWD/config.json:/etc/api2html/config.json api2html -d -c /etc/api2html/config.json
