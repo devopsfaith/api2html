@@ -22,7 +22,7 @@ To create pages that feed from a backend you just need to add in the configurati
     },
     ...
 
-Now in the declared template `products_list.tmpl` you could use the response from the backend under the variable `data` as follows:
+The `Template` setting will look for the file `tmpl/products_list.mustache` and the response of the BackendURLPattern call will be injected in the variable `data`. An example of how you could use it:
 
     <h1>Products for sale</h1>
     <p>Take advantage of the {{extra.promo}}!</p>
