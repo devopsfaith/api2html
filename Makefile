@@ -1,6 +1,7 @@
 .PHONY: all prepare deps test build server_build docker
 
-GOLANG_VERSION=1.9.2-alpine3.7
+GOLANG_VERSION=1.9.3-alpine3.7
+DEP_VERSION=0.4.1
 
 all: deps test build
 
