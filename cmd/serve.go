@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -16,10 +17,12 @@ var (
 		Use:     "serve",
 		Short:   "Run the api2html server.",
 		Long:    "Run the api2html server.",
-		Run:     serve,
+		RunE:    serveWrapper{defaultEngineFactory}.Serve,
 		Aliases: []string{"run", "server", "start"},
 		Example: "api2html serve -d -c config.json",
 	}
+
+	errNilEngine = fmt.Errorf("serve cmd aborted: nil engine")
 )
 
 func init() {
@@ -29,14 +32,32 @@ func init() {
 	serveCmd.PersistentFlags().BoolVarP(&devel, "devel", "d", false, "Enable the devel")
 }
 
-func serve(cmd *cobra.Command, args []string) {
-	engine, err := engine.New(cfgFile, devel)
+type engineWrapper interface {
+	Run(...string) error
+}
+
+type engineFactory func(cfgPath string, devel bool) (engineWrapper, error)
+
+func defaultEngineFactory(cfgPath string, devel bool) (engineWrapper, error) {
+	return engine.New(cfgPath, devel)
+}
+
+type serveWrapper struct {
+	eF engineFactory
+}
+
+func (s serveWrapper) Serve(_ *cobra.Command, _ []string) error {
+	eW, err := s.eF(cfgFile, devel)
 	if err != nil {
 		log.Println("engine creation aborted:", err.Error())
-		return
+		return err
+	}
+	if eW == nil {
+		log.Println("engine creation aborted:", errNilEngine.Error())
+		return errNilEngine
 	}
 
 	time.Sleep(time.Second)
 
-	engine.Run(":8080")
+	return eW.Run(":8080")
 }
