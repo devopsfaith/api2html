@@ -8,8 +8,12 @@ import (
 	"time"
 )
 
+type Generator interface {
+	Generate(isos string) error
+}
+
 func New(basePath, ignoreRegex string) Generator {
-	return Generator{
+	return &BasicGenerator{
 		SourceFolder:     fmt.Sprintf("%s/sources", basePath),
 		ConfigFolder:     fmt.Sprintf("%s/config", basePath),
 		I18NFolder:       fmt.Sprintf("%s/i18n", basePath),
@@ -21,7 +25,7 @@ func New(basePath, ignoreRegex string) Generator {
 	}
 }
 
-type Generator struct {
+type BasicGenerator struct {
 	SourceFolder     string
 	I18NFolder       string
 	ConfigFolder     string
@@ -32,7 +36,7 @@ type Generator struct {
 	RendererFactory  func(string, *regexp.Regexp) Renderer
 }
 
-func (g Generator) Generate(isos string) error {
+func (g *BasicGenerator) Generate(isos string) error {
 	collector := g.CollectorFactory(g.ConfigFolder, g.I18NFolder)
 	renderer := g.RendererFactory(g.OutputFolder, regexp.MustCompile(g.IgnorePattern))
 
