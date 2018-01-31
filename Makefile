@@ -1,13 +1,15 @@
 .PHONY: all prepare deps test build server_build docker
 
-GOLANG_VERSION=1.9.2-alpine3.7
+GOLANG_VERSION=1.9.3-alpine3.7
+DEP_VERSION=0.4.1
+OS=$(shell uname | tr '[:upper:]' '[:lower:]')
 
 all: deps test build
 
 prepare:
 	@echo "Installing dep..."
-	curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-${OS}-amd64 -o ${GOPATH}/bin/dep
-	chmod a+x ${GOPATH}/bin/dep
+	@curl -Ls "https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-${OS}-amd64" -o "${GOPATH}/bin/dep"
+	@chmod a+x ${GOPATH}/bin/dep
 
 deps:
 	@echo "Setting up the vendors folder..."
