@@ -12,6 +12,7 @@ import (
 var (
 	cfgFile string
 	devel   bool
+	port    int
 
 	serveCmd = &cobra.Command{
 		Use:     "serve",
@@ -30,6 +31,7 @@ func init() {
 
 	serveCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.json", "Path to the configuration filename")
 	serveCmd.PersistentFlags().BoolVarP(&devel, "devel", "d", false, "Enable the devel")
+	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Listen port")
 }
 
 type engineWrapper interface {
@@ -59,5 +61,5 @@ func (s serveWrapper) Serve(_ *cobra.Command, _ []string) error {
 
 	time.Sleep(time.Second)
 
-	return eW.Run(":8080")
+	return eW.Run(fmt.Sprintf(":%d", port))
 }
