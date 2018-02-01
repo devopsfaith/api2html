@@ -89,13 +89,13 @@ Once you have successfully compiled API2HTML in your platform the binary `api2ht
     Aliases:
       serve, run, server, start
 
-
     Examples:
-    api2html serve -d -c config.json
+    api2html serve -d -c config.json -p 8080
 
     Flags:
       -c, --config string   Path to the configuration filename (default "config.json")
       -d, --devel           Enable the devel
+      -p, --port int        Listen port (default 8080)
 
 ### Generator
 The generator allows you to create multiple mustache files using templating. That's right create templates with templates!
