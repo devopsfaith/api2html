@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// ParseConfigFromFile creates a Config with the contents of the received filepath
 func ParseConfigFromFile(path string) (Config, error) {
 	configFile, err := os.Open(path)
 	if err != nil {
@@ -16,6 +17,7 @@ func ParseConfigFromFile(path string) (Config, error) {
 	return cfg, err
 }
 
+// ParseConfig parses the content of the reader into a Config
 func ParseConfig(r io.Reader) (Config, error) {
 	var cfg Config
 	err := json.NewDecoder(r).Decode(&cfg)
