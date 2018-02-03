@@ -5,20 +5,28 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	api2htmlhttp "github.com/devopsfaith/api2html/engine/http"
 	"github.com/gin-gonic/gin"
 )
 
+// HandlerConfig defines a Handler
 type HandlerConfig struct {
-	Page              Page
-	Renderer          Renderer
+	// Page contains the page description
+	Page Page
+	// Renderer is the component responsible for rendering the responses
+	Renderer Renderer
+	// ResponseGenerator gets the data required for generating a response
+	// it can get it from a static, local source or from a remote api
+	// endpoint
 	ResponseGenerator ResponseGenerator
-	CacheControl      string
+	// CacheControl is the Cache-Control string added into the response headers
+	// if everything goes ok
+	CacheControl string
 }
 
+// DefaultHandlerConfig contains the dafult values for a HandlerConfig
 var DefaultHandlerConfig = HandlerConfig{
 	Page{},
 	EmptyRenderer,
@@ -26,16 +34,35 @@ var DefaultHandlerConfig = HandlerConfig{
 	"public, max-age=3600",
 }
 
+// ResponseGenerator is a function that, given a gin request, returns a response struc and an error
+//
+// The returned response, even being a map[string]interface{}, can contain these fields by convention:
+// 	- extra:	The content of the 'extra' property of the page
+// 	- context:	The gin context for the request
+// 	- params:	The params of the request
+// 	- helper:	A struct containing a few basic template helpers
+// 	- data:		Depending on the response generator implementation, it cotains the backend data
 type ResponseGenerator func(*gin.Context) (map[string]interface{}, error)
 
+// NoopResponse is a ResponseGenerator that always returns an empty response and the
+// ErrNoResponseGeneratorDefined error
 func NoopResponse(_ *gin.Context) (map[string]interface{}, error) {
 	return map[string]interface{}{}, ErrNoResponseGeneratorDefined
 }
 
+// StaticResponseGenerator is a ResponseGenerator that creates a response just by adding the
+// default response values
+// 	map[string]interface{}{
+// 		"extra":   s.Page.Extra,
+// 		"context": c,
+// 		"params":  params,
+// 		"helper":  &tplHelper{},
+// 	}
 type StaticResponseGenerator struct {
 	Page Page
 }
 
+// ResponseGenerator implements the ResponseGenerator interface
 func (s *StaticResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]interface{}, error) {
 	params := map[string]string{}
 	for _, v := range c.Params {
@@ -45,17 +72,36 @@ func (s *StaticResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]
 		"extra":   s.Page.Extra,
 		"context": c,
 		"params":  params,
-		"helper":  &TplHelper{},
+		"helper":  &tplHelper{},
 	}
 	return target, nil
 }
 
+// DynamicResponseGenerator is a ResponseGenerator that creates a response by adding the decoded data
+// returned by the Backend wo the default response values. Depending on the selected decoder,
+// the generated responses may have this structure
+// 	map[string]interface{}{
+// 		"data":    []map[sitring]interface{}{},
+// 		"extra":   s.Page.Extra,
+// 		"context": c,
+// 		"params":  params,
+// 		"helper":  &tplHelper{},
+// 	}
+// or this one
+// 	map[string]interface{}{
+// 		"data":    []map[sitring]interface{}{},
+// 		"extra":   s.Page.Extra,
+// 		"context": c,
+// 		"params":  params,
+// 		"helper":  &tplHelper{},
+// 	}
 type DynamicResponseGenerator struct {
 	Page    Page
 	Backend Backend
 	Decoder Decoder
 }
 
+// ResponseGenerator implements the ResponseGenerator interface
 func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]interface{}, error) {
 	params := map[string]string{}
 	for _, v := range c.Params {
@@ -79,10 +125,11 @@ func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (map[stri
 	target["extra"] = drg.Page.Extra
 	target["context"] = c
 	target["params"] = params
-	target["helper"] = &TplHelper{}
+	target["helper"] = &tplHelper{}
 	return target, nil
 }
 
+// NewHandlerConfig creates a HandlerConfig from the given Page definition
 func NewHandlerConfig(page Page) HandlerConfig {
 	d, err := time.ParseDuration(page.CacheTTL)
 	if err != nil {
@@ -114,6 +161,9 @@ func NewHandlerConfig(page Page) HandlerConfig {
 	}
 }
 
+// NewHandler creates a Handler with the given configuration. The returned handler will be keeping itself
+// subscribed to the latest template updates using the given subscription channel, allowing hot
+// template reloads
 func NewHandler(cfg HandlerConfig, subscriptionChan chan Subscription) *Handler {
 	h := &Handler{
 		cfg.Page,
@@ -127,6 +177,12 @@ func NewHandler(cfg HandlerConfig, subscriptionChan chan Subscription) *Handler 
 	return h
 }
 
+// Handler is a struct that combines a renderer and a response generator for handling
+// http requests.
+//
+// The handler is able to keep itself subscribed to the last renderer version to use
+// by wrapping its Input channel into a Subscription and sending it throught the Subscribe
+// channel every time it gets a new Renderer
 type Handler struct {
 	Page              Page
 	Renderer          Renderer
@@ -147,6 +203,8 @@ func (h *Handler) updateRenderer() {
 	}
 }
 
+// HandlerFunc handles a gin request rendering the data returned by the response generator.
+// If the response generator does not return an error, it adds a Cache-Control header
 func (h *Handler) HandlerFunc(c *gin.Context) {
 	target, err := h.ResponseGenerator(c)
 	if err != nil {
@@ -161,21 +219,9 @@ func (h *Handler) HandlerFunc(c *gin.Context) {
 	}
 }
 
-type TplHelper struct {
-}
-
-func (t *TplHelper) Now() string {
-	return time.Now().String()
-}
-
+// NewErrorHandler creates a ErrorHandler using the content of the received path
 func NewErrorHandler(path string) (ErrorHandler, error) {
-	templateFile, err := os.Open(path)
-	if err != nil {
-		log.Println("reading", path, ":", err.Error())
-		return ErrorHandler{}, err
-	}
-	defer templateFile.Close()
-	data, err := ioutil.ReadAll(templateFile)
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println("reading", path, ":", err.Error())
 		return ErrorHandler{}, err
@@ -183,10 +229,13 @@ func NewErrorHandler(path string) (ErrorHandler, error) {
 	return ErrorHandler{data}, nil
 }
 
+// ErrorHandler is a Handler that writes the injected content. It's intended to be dispatched
+// by the gin special handlers (NoRoute, NoMethod) but they can also be used as regular handlers
 type ErrorHandler struct {
 	Content []byte
 }
 
+// HandlerFunc is a gin middleware for dealing with some errors
 func (e *ErrorHandler) HandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
@@ -199,8 +248,16 @@ func (e *ErrorHandler) HandlerFunc() gin.HandlerFunc {
 	}
 }
 
+// StaticHandlerFunc creates a gin handler that does nothing but writing the static content
 func (e *ErrorHandler) StaticHandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Write(e.Content)
 	}
+}
+
+type tplHelper struct {
+}
+
+func (tplHelper) Now() string {
+	return time.Now().String()
 }

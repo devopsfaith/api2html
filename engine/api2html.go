@@ -29,7 +29,7 @@ type Page struct {
 	Extra             map[string]interface{}
 }
 
-type Backend func(map[string]string, map[string]string) (*http.Response, error)
+type Backend func(params map[string]string, headers map[string]string) (*http.Response, error)
 
 type Decoder func(io.Reader) (map[string]interface{}, error)
 
