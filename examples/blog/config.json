@@ -24,8 +24,8 @@
       "extra": {"is_home":true }
     }
   ],
-  "templates": {"home":"tmpl/home.mustache","post":"tmpl/post.mustache"},
-  "layouts": {"main":"tmpl/main_layout.mustache"},
+  "templates": {"home":"home.mustache","post":"post.mustache"},
+  "layouts": {"main":"main_layout.mustache"},
   "extra":{
     "lang": "en-US",
     "copyright": "© 2018 My Company"
