@@ -34,101 +34,6 @@ var DefaultHandlerConfig = HandlerConfig{
 	"public, max-age=3600",
 }
 
-// ResponseGenerator is a function that, given a gin request, returns a response struc and an error
-//
-// The returned response, even being a map[string]interface{}, can contain these fields by convention:
-// 	- extra:	The content of the 'extra' property of the page
-// 	- context:	The gin context for the request
-// 	- params:	The params of the request
-// 	- helper:	A struct containing a few basic template helpers
-// 	- data:		Depending on the response generator implementation, it cotains the backend data
-type ResponseGenerator func(*gin.Context) (map[string]interface{}, error)
-
-// NoopResponse is a ResponseGenerator that always returns an empty response and the
-// ErrNoResponseGeneratorDefined error
-func NoopResponse(_ *gin.Context) (map[string]interface{}, error) {
-	return map[string]interface{}{}, ErrNoResponseGeneratorDefined
-}
-
-// StaticResponseGenerator is a ResponseGenerator that creates a response just by adding the
-// default response values
-// 	map[string]interface{}{
-// 		"extra":   s.Page.Extra,
-// 		"context": c,
-// 		"params":  params,
-// 		"helper":  &tplHelper{},
-// 	}
-type StaticResponseGenerator struct {
-	Page Page
-}
-
-// ResponseGenerator implements the ResponseGenerator interface
-func (s *StaticResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]interface{}, error) {
-	params := map[string]string{}
-	for _, v := range c.Params {
-		params[v.Key] = v.Value
-	}
-	target := map[string]interface{}{
-		"extra":   s.Page.Extra,
-		"context": c,
-		"params":  params,
-		"helper":  &tplHelper{},
-	}
-	return target, nil
-}
-
-// DynamicResponseGenerator is a ResponseGenerator that creates a response by adding the decoded data
-// returned by the Backend wo the default response values. Depending on the selected decoder,
-// the generated responses may have this structure
-// 	map[string]interface{}{
-// 		"data":    []map[sitring]interface{}{},
-// 		"extra":   s.Page.Extra,
-// 		"context": c,
-// 		"params":  params,
-// 		"helper":  &tplHelper{},
-// 	}
-// or this one
-// 	map[string]interface{}{
-// 		"data":    []map[sitring]interface{}{},
-// 		"extra":   s.Page.Extra,
-// 		"context": c,
-// 		"params":  params,
-// 		"helper":  &tplHelper{},
-// 	}
-type DynamicResponseGenerator struct {
-	Page    Page
-	Backend Backend
-	Decoder Decoder
-}
-
-// ResponseGenerator implements the ResponseGenerator interface
-func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]interface{}, error) {
-	params := map[string]string{}
-	for _, v := range c.Params {
-		params[v.Key] = v.Value
-	}
-	headers := map[string]string{}
-	h := c.Request.Header.Get(drg.Page.Header)
-	if h != "" {
-		headers[drg.Page.Header] = h
-	}
-	resp, err := drg.Backend(params, headers)
-	if err != nil {
-		return map[string]interface{}{}, err
-	}
-	defer resp.Body.Close()
-
-	target, err := drg.Decoder(resp.Body)
-	if err != nil {
-		return map[string]interface{}{}, err
-	}
-	target["extra"] = drg.Page.Extra
-	target["context"] = c
-	target["params"] = params
-	target["helper"] = &tplHelper{}
-	return target, nil
-}
-
 // NewHandlerConfig creates a HandlerConfig from the given Page definition
 func NewHandlerConfig(page Page) HandlerConfig {
 	d, err := time.ParseDuration(page.CacheTTL)
@@ -206,14 +111,14 @@ func (h *Handler) updateRenderer() {
 // HandlerFunc handles a gin request rendering the data returned by the response generator.
 // If the response generator does not return an error, it adds a Cache-Control header
 func (h *Handler) HandlerFunc(c *gin.Context) {
-	target, err := h.ResponseGenerator(c)
+	result, err := h.ResponseGenerator(c)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.Header("Cache-Control", h.CacheControl)
-	if err := h.Renderer.Render(c.Writer, &target); err != nil {
+	if err := h.Renderer.Render(c.Writer, &result); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -253,11 +158,4 @@ func (e *ErrorHandler) StaticHandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Write(e.Content)
 	}
-}
-
-type tplHelper struct {
-}
-
-func (tplHelper) Now() string {
-	return time.Now().String()
 }
