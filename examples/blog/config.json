@@ -1,0 +1,33 @@
+{
+  "robots": true,
+  "sitemap": true,
+  "static_txt_content": [
+    "hello.txt"
+  ],
+  "pages":[
+    {
+      "name": "post",
+      "URLPattern": "/posts/:post",
+      "BackendURLPattern": "https://jsonplaceholder.typicode.com/posts/:post",
+      "Template": "post",
+      "Layout": "main",
+      "CacheTTL": "3600s"
+    },
+    {
+      "name": "home",
+      "URLPattern": "/",
+      "BackendURLPattern": "https://jsonplaceholder.typicode.com/posts",
+      "Template": "home",
+      "Layout": "main",
+      "CacheTTL": "3600s",
+      "IsArray": true,
+      "extra": {"is_home":true }
+    }
+  ],
+  "templates": {"home":"home.mustache","post":"post.mustache"},
+  "layouts": {"main":"main_layout.mustache"},
+  "extra":{
+    "lang": "en-US",
+    "copyright": "© 2018 My Company"
+  }
+}
