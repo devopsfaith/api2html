@@ -1,0 +1,28 @@
+<div class="row">
+	<div class="col-md-6">
+		<h2 class="blog-post-title">{{data.title}}</h2>
+		<p class="blog-post-meta">January 1, 2018 by employee number <a href="#">{{data.userId}}</a></p>
+
+		<p>{{data.body}}</p>
+		<hr/>
+		<p><a href="/">Back</a></p>
+	</div>
+	<div class="col-md-6">
+		<h3>Where the data comes from?</h3>
+		<p>The response from the API is:
+			<a href="https://jsonplaceholder.typicode.com/posts/{{data.id}}">
+				https://jsonplaceholder.typicode.com/posts/{{data.id}}
+			</a>
+		</p>
+		<pre>
+{
+  "userId": {{data.userId}},
+  "id": {{data.id}},
+  "title": "{{data.title}}",
+  "body": "{{data.body}}"
+}
+</pre>
+
+	</div>
+</div>
+
