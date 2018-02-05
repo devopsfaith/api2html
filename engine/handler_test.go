@@ -117,3 +117,17 @@ func TestNewErrorHandler(t *testing.T) {
 		t.Errorf("unexpected response content: %s", string(res))
 	}
 }
+
+func TestNewStaticHandler_ko(t *testing.T) {
+	_, err := NewStaticHandler("unknown_file_not_present_in_the_fs")
+	if err == nil {
+		t.Error("error expected")
+	}
+}
+
+func TestNewErrorHandlerr_ko(t *testing.T) {
+	_, err := NewErrorHandler("unknown_file_not_present_in_the_fs")
+	if err == nil {
+		t.Error("error expected")
+	}
+}

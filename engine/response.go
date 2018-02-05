@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -8,8 +10,11 @@ import (
 
 // ResponseContext is the struct ready to rendered and returned to the Handler
 type ResponseContext struct {
-	// Data cotains the backend data
-	Data  BackendData
+	// Data cotains the backend data if the response was decoded as a struct
+	Data map[string]interface{}
+	// Array cotains the backend data if the response was decoded as an array
+	Array []map[string]interface{}
+	// Extra contains the extra data injected from the config
 	Extra map[string]interface{}
 	// Params stores the params of the request
 	Params map[string]string
@@ -17,6 +22,17 @@ type ResponseContext struct {
 	Helper interface{}
 	// 	Context is a reference to the gin context for the request
 	Context *gin.Context
+}
+
+// String implements the Stringer interface
+func (r *ResponseContext) String() string {
+	d, err := json.MarshalIndent(r, "", "\t")
+	log.Println("decoding", r, "as", string(d))
+	if err != nil {
+		log.Println(err.Error())
+		return ""
+	}
+	return string(d)
 }
 
 // ResponseGenerator is a function that, given a gin request, returns a response struc and an error
@@ -80,7 +96,7 @@ func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (Response
 		return result, err
 	}
 
-	result.Data, err = drg.Decoder(resp.Body)
+	err = drg.Decoder(resp.Body, &result)
 	resp.Body.Close()
 	return result, err
 }

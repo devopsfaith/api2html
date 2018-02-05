@@ -12,6 +12,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// func TestResponseContext_String(t *testing.T){
+// 	r := ResponseContext{
+// 		Data: BackendData{
+// 			O
+// 			},
+// 	}
+// }
+
 func TestNoopResponse(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	e := gin.New()
@@ -20,8 +28,11 @@ func TestNoopResponse(t *testing.T) {
 		if err != ErrNoResponseGeneratorDefined {
 			t.Error("unexpected error:", err)
 		}
-		if len(resp.Data.Arr) != 0 {
-			t.Error("unexpected response: %v", resp)
+		if len(resp.Array) != 0 {
+			t.Errorf("unexpected response: %v", resp)
+		}
+		if len(resp.Data) != 0 {
+			t.Errorf("unexpected response: %v", resp)
 		}
 		c.Status(200)
 	})
@@ -30,7 +41,7 @@ func TestNoopResponse(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	e.ServeHTTP(w, r)
 	if w.Result().StatusCode != 200 {
-		t.Error("unexpected status code: %d", w.Result().StatusCode)
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
 	}
 }
 
@@ -52,7 +63,7 @@ func TestStaticResponseGenerator(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/foo/bar", nil)
 	e.ServeHTTP(w, r)
 	if w.Result().StatusCode != 200 {
-		t.Error("unexpected status code: %d", w.Result().StatusCode)
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
 	}
 }
 
@@ -103,13 +114,13 @@ func TestDynamicResponseGenerator_koDecoder(t *testing.T) {
 		Backend: func(_ map[string]string, _ map[string]string) (*http.Response, error) {
 			return &http.Response{Body: ioutil.NopCloser(bytes.NewBufferString(expectedResponse))}, nil
 		},
-		Decoder: func(r io.Reader) (BackendData, error) {
+		Decoder: func(r io.Reader, c *ResponseContext) error {
 			p := &bytes.Buffer{}
 			p.ReadFrom(r)
 			if p.String() != expectedResponse {
 				t.Error("unexpected response:", p.String())
 			}
-			return BackendData{}, decoderErr
+			return decoderErr
 		},
 	}
 	gin.SetMode(gin.TestMode)
@@ -127,7 +138,7 @@ func TestDynamicResponseGenerator_koDecoder(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/foo/bar", nil)
 	e.ServeHTTP(w, r)
 	if w.Result().StatusCode != 200 {
-		t.Error("unexpected status code: %d", w.Result().StatusCode)
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
 	}
 }
 
@@ -138,13 +149,14 @@ func TestDynamicResponseGenerator_ok(t *testing.T) {
 		Backend: func(_ map[string]string, _ map[string]string) (*http.Response, error) {
 			return &http.Response{Body: ioutil.NopCloser(bytes.NewBufferString(expectedResponse))}, nil
 		},
-		Decoder: func(r io.Reader) (BackendData, error) {
+		Decoder: func(r io.Reader, c *ResponseContext) error {
 			p := &bytes.Buffer{}
 			p.ReadFrom(r)
 			if p.String() != expectedResponse {
 				t.Error("unexpected response:", p.String())
 			}
-			return BackendData{Obj: map[string]interface{}{"a": true}}, nil
+			c.Data = map[string]interface{}{"a": true}
+			return nil
 		},
 	}
 	gin.SetMode(gin.TestMode)
@@ -157,8 +169,8 @@ func TestDynamicResponseGenerator_ok(t *testing.T) {
 		}
 		checkCommonResponseProperties(t, resp)
 
-		if d, ok := resp.Data.Obj["a"].(bool); !ok || !d {
-			t.Error("unexpected response. data: %v", resp.Data)
+		if d, ok := resp.Data["a"].(bool); !ok || !d {
+			t.Errorf("unexpected response. data: %v", resp.Data)
 			return
 		}
 		c.Status(200)
@@ -168,21 +180,21 @@ func TestDynamicResponseGenerator_ok(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/foo/bar", nil)
 	e.ServeHTTP(w, r)
 	if w.Result().StatusCode != 200 {
-		t.Error("unexpected status code: %d", w.Result().StatusCode)
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
 	}
 }
 
 func checkCommonResponseProperties(t *testing.T, resp ResponseContext) {
 	if 42.0 != resp.Extra["a"].(float64) {
-		t.Error("unexpected response. extra: %v", resp.Extra)
+		t.Errorf("unexpected response. extra: %v", resp.Extra)
 		return
 	}
 	if v, ok := resp.Params["first"]; !ok || v != "foo" {
-		t.Error("unexpected response. first param: %v", resp.Params["first"])
+		t.Errorf("unexpected response. first param: %v", resp.Params["first"])
 		return
 	}
 	if v, ok := resp.Params["second"]; !ok || v != "bar" {
-		t.Error("unexpected response. second param: %v", resp.Params["second"])
+		t.Errorf("unexpected response. second param: %v", resp.Params["second"])
 		return
 	}
 	if resp.Context == nil {
@@ -190,7 +202,7 @@ func checkCommonResponseProperties(t *testing.T, resp ResponseContext) {
 		return
 	}
 	if v, ok := resp.Helper.(*tplHelper); !ok || v == nil {
-		t.Error("unexpected response. helper: %v", resp.Helper)
+		t.Errorf("unexpected response. helper: %v", resp.Helper)
 		return
 	}
 }

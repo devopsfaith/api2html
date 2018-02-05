@@ -1,10 +1,8 @@
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -36,25 +34,7 @@ type Page struct {
 	Extra             map[string]interface{}
 }
 
-type BackendData struct {
-	Obj map[string]interface{}
-	Arr []map[string]interface{}
-}
-
-// String implements the Stringer interface
-func (b *BackendData) String() string {
-	d, err := json.MarshalIndent(b, "", "\t")
-	log.Println("decoding", b, "as", string(d))
-	if err != nil {
-		log.Println(err.Error())
-		return ""
-	}
-	return string(d)
-}
-
 type Backend func(params map[string]string, headers map[string]string) (*http.Response, error)
-
-type Decoder func(io.Reader) (BackendData, error)
 
 type Renderer interface {
 	Render(io.Writer, interface{}) error
@@ -67,18 +47,6 @@ type Subscription struct {
 
 func ErrorPlaceHolder(_ map[string]string) (*http.Response, error) {
 	return nil, ErrNoBackendDefined
-}
-
-func JSONDecoder(r io.Reader) (BackendData, error) {
-	var target map[string]interface{}
-	err := json.NewDecoder(r).Decode(&target)
-	return BackendData{Obj: target}, err
-}
-
-func JSONArrayDecoder(r io.Reader) (BackendData, error) {
-	var target []map[string]interface{}
-	err := json.NewDecoder(r).Decode(&target)
-	return BackendData{Arr: target}, err
 }
 
 type ErrorRenderer struct {
