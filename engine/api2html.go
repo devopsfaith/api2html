@@ -16,6 +16,12 @@ type Config struct {
 	Templates        map[string]string      `json:"templates"`
 	Layouts          map[string]string      `json:"layouts"`
 	Extra            map[string]interface{} `json:"extra"`
+	PublicFolder     *PublicFolder          `json:"public_folder"`
+}
+
+type PublicFolder struct {
+	Path   string `json:"path_to_folder"`
+	Prefix string `json:"url_prefix"`
 }
 
 type Page struct {

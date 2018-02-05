@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -88,4 +89,9 @@ func setStatics(e *gin.Engine, cfg Config) {
 		log.Println("registering the static", fileName)
 		e.StaticFile(fmt.Sprintf("/%s", fileName), fmt.Sprintf("./static/%s", fileName))
 	}
+
+	if cfg.PublicFolder != nil {
+		e.Use(static.Serve(cfg.PublicFolder.Prefix, static.LocalFile(cfg.PublicFolder.Path, false)))
+	}
+
 }
