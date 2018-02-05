@@ -8,6 +8,10 @@ import (
 	"testing"
 )
 
+func TestMustachePartials(t *testing.T) {
+	fmt.Println(customPartialProvider.Get("api2html/debug"))
+}
+
 func TestNewMustacheRenderer(t *testing.T) {
 	tmpl, err := NewMustacheRenderer(bytes.NewBufferString(`-{{ a }}-`))
 	if err != nil {
