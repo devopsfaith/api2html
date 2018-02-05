@@ -84,7 +84,7 @@ func mustacheRender(source, target string, data Data) error {
 		return err
 	}
 
-	log.Println("writting the contents of", source, "into", target)
+	log.Println("writing the contents of", source, "into", target)
 
 	file, err := os.OpenFile(target, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {

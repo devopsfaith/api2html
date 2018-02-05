@@ -1,6 +1,8 @@
 
 ![api2html](https://raw.githubusercontent.com/devopsfaith/api2html.com/master/img/API2HTML-on-white.png)
 
+[![Build Status](https://travis-ci.org/devopsfaith/api2html.svg?branch=master)](https://travis-ci.org/devopsfaith/api2html) [![Go Report Card](https://goreportcard.com/badge/github.com/devopsfaith/api2html)](https://goreportcard.com/report/github.com/devopsfaith/api2html) [![GoDoc](https://godoc.org/github.com/devopsfaith/api2html?status.svg)](https://godoc.org/github.com/devopsfaith/api2html)
+
 ### On the fly HTML generator from API data
 
 API2HTML is a web server that renders [Mustache](http://mustache.github.io/) templates and injects them your API data. This allows you to build websites by just declaring the API sources and writing the template view.

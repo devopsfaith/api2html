@@ -86,7 +86,7 @@ func NewHandler(cfg HandlerConfig, subscriptionChan chan Subscription) *Handler 
 // http requests.
 //
 // The handler is able to keep itself subscribed to the last renderer version to use
-// by wrapping its Input channel into a Subscription and sending it throught the Subscribe
+// by wrapping its Input channel into a Subscription and sending it through the Subscribe
 // channel every time it gets a new Renderer
 type Handler struct {
 	Page              Page

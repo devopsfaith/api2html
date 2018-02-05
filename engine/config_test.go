@@ -146,7 +146,7 @@ func TestParseConfig_extra(t *testing.T) {
 		if tmp, ok := p.Extra["a"].(map[string]interface{}); !ok {
 			t.Errorf("the page #%d has a wrong extra. have: %v", i, p.Extra)
 		} else if v, ok := tmp["a1"].(float64); !ok || v != 42 {
-			t.Errorf("the page #%d has a wrong extra['a']. have: %v (%t)", i, tmp, v)
+			t.Errorf("the page #%d has a wrong extra['a']. have: %v (%f)", i, tmp, v)
 		}
 		if p.Name == "page02" {
 			if tmp, ok := p.Extra["b"].(bool); !ok || !tmp {

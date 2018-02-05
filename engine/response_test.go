@@ -124,7 +124,7 @@ func TestDynamicResponseGenerator_koBackend(t *testing.T) {
 	r.Header.Set(expectedHeader[0], expectedHeader[1])
 	e.ServeHTTP(w, r)
 	if w.Result().StatusCode != 200 {
-		t.Error("unexpected status code: %d", w.Result().StatusCode)
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
 	}
 }
 

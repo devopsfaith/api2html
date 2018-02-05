@@ -261,7 +261,7 @@ func TestNewHandlerConfig_StaticResponseGenerator(t *testing.T) {
 		t.Errorf("unexpected cache control: %s", cfg.CacheControl)
 	}
 	if cfg.Page.Name != "name" {
-		t.Errorf("unexpected page config: %s", cfg.Page)
+		t.Errorf("unexpected page config: %v", cfg.Page)
 	}
 }
 
@@ -271,6 +271,6 @@ func TestNewHandlerConfig_DynamicResponseGenerator(t *testing.T) {
 		t.Errorf("unexpected cache control: %s", cfg.CacheControl)
 	}
 	if cfg.Page.Name != "name" {
-		t.Errorf("unexpected page config: %s", cfg.Page)
+		t.Errorf("unexpected page config: %v", cfg.Page)
 	}
 }
