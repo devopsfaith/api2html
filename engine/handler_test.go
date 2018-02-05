@@ -155,6 +155,31 @@ func TestNewHandler(t *testing.T) {
 	subscriptionChan := make(chan Subscription)
 	h := NewHandler(cfg, subscriptionChan)
 
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.GET("/", h.HandlerFunc)
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	engine.ServeHTTP(w, req)
+
+	if w.Result().StatusCode != 500 {
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
+	}
+	res, err := ioutil.ReadAll(w.Result().Body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w.Result().Body.Close()
+	if string(res) != "" {
+		t.Errorf("unexpected response content: %s", string(res))
+	}
+
 	subscription := <-subscriptionChan
 	if subscription.Name != layout+"-:-"+templateName {
 		t.Errorf("unexpected subscription topic: %s", subscription.Name)
@@ -173,6 +198,37 @@ func TestNewHandler(t *testing.T) {
 	})
 	<-subscriptionChan
 
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	engine.ServeHTTP(w, req)
+
+	if w.Result().StatusCode != 200 {
+		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
+	}
+	res, err = ioutil.ReadAll(w.Result().Body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w.Result().Body.Close()
+	if string(res) != responseBody {
+		t.Errorf("unexpected response content: %s", string(res))
+	}
+}
+
+func TestNewHandler_ko(t *testing.T) {
+	cfg := HandlerConfig{
+		Renderer:          EmptyRenderer,
+		ResponseGenerator: NoopResponse,
+		Page:              Page{},
+	}
+	subscriptionChan := make(chan Subscription)
+	h := NewHandler(cfg, subscriptionChan)
+
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
 	engine.GET("/", h.HandlerFunc)
@@ -185,7 +241,7 @@ func TestNewHandler(t *testing.T) {
 	}
 	engine.ServeHTTP(w, req)
 
-	if w.Result().StatusCode != 200 {
+	if w.Result().StatusCode != 500 {
 		t.Errorf("unexpected status code: %d", w.Result().StatusCode)
 	}
 	res, err := ioutil.ReadAll(w.Result().Body)
@@ -194,7 +250,27 @@ func TestNewHandler(t *testing.T) {
 		return
 	}
 	w.Result().Body.Close()
-	if string(res) != responseBody {
+	if string(res) != "" {
 		t.Errorf("unexpected response content: %s", string(res))
+	}
+}
+
+func TestNewHandlerConfig_StaticResponseGenerator(t *testing.T) {
+	cfg := NewHandlerConfig(Page{Name: "name"})
+	if cfg.CacheControl != "public, max-age=3600" {
+		t.Errorf("unexpected cache control: %s", cfg.CacheControl)
+	}
+	if cfg.Page.Name != "name" {
+		t.Errorf("unexpected page config: %s", cfg.Page)
+	}
+}
+
+func TestNewHandlerConfig_DynamicResponseGenerator(t *testing.T) {
+	cfg := NewHandlerConfig(Page{Name: "name", IsArray: true, BackendURLPattern: "http://example.com"})
+	if cfg.CacheControl != "public, max-age=3600" {
+		t.Errorf("unexpected cache control: %s", cfg.CacheControl)
+	}
+	if cfg.Page.Name != "name" {
+		t.Errorf("unexpected page config: %s", cfg.Page)
 	}
 }
