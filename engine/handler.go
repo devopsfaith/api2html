@@ -124,6 +124,28 @@ func (h *Handler) HandlerFunc(c *gin.Context) {
 	}
 }
 
+// NewStaticHandler creates a StaticHandler using the content of the received path
+func NewStaticHandler(path string) (StaticHandler, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Println("reading", path, ":", err.Error())
+		return StaticHandler{}, err
+	}
+	return StaticHandler{data}, nil
+}
+
+// StaticHandler is a Handler that writes the injected content
+type StaticHandler struct {
+	Content []byte
+}
+
+// HandlerFunc creates a gin handler that does nothing but writing the static content
+func (e *StaticHandler) HandlerFunc() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Write(e.Content)
+	}
+}
+
 // NewErrorHandler creates a ErrorHandler using the content of the received path
 func NewErrorHandler(path string) (ErrorHandler, error) {
 	data, err := ioutil.ReadFile(path)
@@ -149,13 +171,6 @@ func (e *ErrorHandler) HandlerFunc() gin.HandlerFunc {
 			return
 		}
 
-		c.Writer.Write(e.Content)
-	}
-}
-
-// StaticHandlerFunc creates a gin handler that does nothing but writing the static content
-func (e *ErrorHandler) StaticHandlerFunc() gin.HandlerFunc {
-	return func(c *gin.Context) {
 		c.Writer.Write(e.Content)
 	}
 }

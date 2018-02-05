@@ -27,12 +27,12 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 	pf := NewMustachePageFactory(e, templateStore)
 	pf.Build(cfg)
 
-	if h, err := NewErrorHandler("./static/404"); err == nil {
-		e.NoRoute(h.StaticHandlerFunc())
+	if h, err := NewStaticHandler("./static/404"); err == nil {
+		e.NoRoute(h.HandlerFunc())
 	}
 
-	if h, err := NewErrorHandler("./static/405"); err == nil {
-		e.NoMethod(h.StaticHandlerFunc())
+	if h, err := NewStaticHandler("./static/405"); err == nil {
+		e.NoMethod(h.HandlerFunc())
 	}
 
 	if devel {
