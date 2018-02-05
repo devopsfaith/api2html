@@ -81,7 +81,7 @@ type partialProvider struct {
 }
 
 func (sp *partialProvider) Get(name string) (string, error) {
-	if data, err := sp.statics.Get(name); err == nil {
+	if data, err := sp.statics.Get(name); err == nil && data != "" {
 		return data, nil
 	}
 
@@ -89,9 +89,12 @@ func (sp *partialProvider) Get(name string) (string, error) {
 }
 
 var (
+	partials = map[string]string{
+		"api2html/debug": debuggerTmpl,
+	}
 	customPartialProvider = &partialProvider{
 		dynamc:  &mustache.FileProvider{},
-		statics: &mustache.StaticProvider{Partials: map[string]string{"api2html/debug": debuggerTmpl}},
+		statics: &mustache.StaticProvider{Partials: partials},
 	}
 
 	debuggerTmpl = `
