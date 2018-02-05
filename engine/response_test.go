@@ -12,13 +12,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// func TestResponseContext_String(t *testing.T){
-// 	r := ResponseContext{
-// 		Data: BackendData{
-// 			O
-// 			},
-// 	}
-// }
+func ExampleResponseContext_String() {
+	r := ResponseContext{
+		Data: map[string]interface{}{
+			"a": "foo",
+			"b": 42,
+		},
+		Params: map[string]string{"p1": "v1"},
+		Extra: map[string]interface{}{
+			"extra1": "foo",
+			"extra2": 42,
+		},
+	}
+	fmt.Println(r.String())
+	// Output:
+	// {
+	// 	"Data": {
+	// 		"a": "foo",
+	// 		"b": 42
+	// 	},
+	// 	"Array": null,
+	// 	"Extra": {
+	// 		"extra1": "foo",
+	// 		"extra2": 42
+	// 	},
+	// 	"Params": {
+	// 		"p1": "v1"
+	// 	}
+	// }
+}
 
 func TestNoopResponse(t *testing.T) {
 	gin.SetMode(gin.TestMode)

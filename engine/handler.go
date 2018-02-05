@@ -118,7 +118,7 @@ func (h *Handler) HandlerFunc(c *gin.Context) {
 	}
 
 	c.Header("Cache-Control", h.CacheControl)
-	if err := h.Renderer.Render(c.Writer, &result); err != nil {
+	if err := h.Renderer.Render(c.Writer, result); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

@@ -40,6 +40,10 @@ type Renderer interface {
 	Render(io.Writer, interface{}) error
 }
 
+type RendererFunc func(io.Writer, interface{}) error
+
+func (rf RendererFunc) Render(w io.Writer, v interface{}) error { return rf(w, v) }
+
 type Subscription struct {
 	Name string
 	In   chan Renderer
@@ -53,9 +57,7 @@ type ErrorRenderer struct {
 	Error error
 }
 
-func (r ErrorRenderer) Render(_ io.Writer, _ interface{}) error {
-	return r.Error
-}
+func (r ErrorRenderer) Render(_ io.Writer, _ interface{}) error { return r.Error }
 
 var (
 	ErrNoResponseGeneratorDefined = fmt.Errorf("no response generator defined")

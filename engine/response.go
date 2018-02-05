@@ -27,7 +27,6 @@ type ResponseContext struct {
 // String implements the Stringer interface
 func (r *ResponseContext) String() string {
 	d, err := json.MarshalIndent(r, "", "\t")
-	log.Println("decoding ResponseContext as", string(d))
 	if err != nil {
 		log.Println(err.Error())
 		return ""
