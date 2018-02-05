@@ -20,7 +20,7 @@ func JSONDecoder(r io.Reader, c *ResponseContext) error {
 	return nil
 }
 
-// JSONDecoder decodes the reader content and puts it into the Array property of the
+// JSONArrayDecoder decodes the reader content and puts it into the Array property of the
 // injected ResponseContext
 func JSONArrayDecoder(r io.Reader, c *ResponseContext) error {
 	var target []map[string]interface{}

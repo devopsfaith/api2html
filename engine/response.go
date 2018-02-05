@@ -19,15 +19,15 @@ type ResponseContext struct {
 	// Params stores the params of the request
 	Params map[string]string
 	// Helper is a struct containing a few basic template helpers
-	Helper interface{}
+	Helper interface{} `json:"-"`
 	// 	Context is a reference to the gin context for the request
-	Context *gin.Context
+	Context *gin.Context `json:"-"`
 }
 
 // String implements the Stringer interface
 func (r *ResponseContext) String() string {
 	d, err := json.MarshalIndent(r, "", "\t")
-	log.Println("decoding", r, "as", string(d))
+	log.Println("decoding ResponseContext as", string(d))
 	if err != nil {
 		log.Println(err.Error())
 		return ""
