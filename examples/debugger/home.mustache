@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="{{Extra.lang}}">
+<head>
+    <meta charset="utf-8">
+	<title>{{ Extra.metadata_title }}</title>
+</head>
+
+<body>
+	<h1>Hi there!</h1>
+    <small>page generated at {{ Helper.Now }}</small>
+    <h2>Request context params</h2>
+    <div>
+        <ul>{{ #Context.params }}
+        <li>{{ . }}</li>{{ /Context.params }}
+        </ul>
+    </div>
+    <h2>Request context keys</h2>
+    <div>
+        <ul>{{ #Context.keys }}
+        <li>{{ . }}</li>{{ /Context.keys }}
+        </ul>
+    </div>
+    <h2>Request params</h2>
+    <div>
+        <ul>{{ #Params }}
+        <li>{{ . }}</li>{{ /Params }}
+        </ul>
+    </div>
+    <h2>Extra data</h2>
+    <div>
+        <ul>{{ #Extra }}
+        <li>{{ . }}</li>{{ /Extra }}
+        </ul>
+    </div>
+    <h2>Backend data</h2>
+    <h3>Full response</h3>
+    <div>{{ String }}</div>
+    <h3>Full response (as object)</h3>
+    <div>
+        <ul>{{ #Data }}
+        <li>{{ . }}</li>{{ /Data }}
+        </ul>
+    </div>
+    <h3>Full response (as array)</h3>
+    <div>
+        <ul>{{ #Array }}
+        <li>{{ . }}</li>{{ /Array }}
+        </ul>
+    </div>
+</body>
