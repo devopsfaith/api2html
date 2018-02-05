@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +14,12 @@ type Config struct {
 	Templates        map[string]string      `json:"templates"`
 	Layouts          map[string]string      `json:"layouts"`
 	Extra            map[string]interface{} `json:"extra"`
+	PublicFolder     *PublicFolder          `json:"public_folder"`
+}
+
+type PublicFolder struct {
+	Path   string `json:"path_to_folder"`
+	Prefix string `json:"url_prefix"`
 }
 
 type Page struct {
@@ -29,13 +34,15 @@ type Page struct {
 	Extra             map[string]interface{}
 }
 
-type Backend func(map[string]string, map[string]string) (*http.Response, error)
-
-type Decoder func(io.Reader) (map[string]interface{}, error)
+type Backend func(params map[string]string, headers map[string]string) (*http.Response, error)
 
 type Renderer interface {
 	Render(io.Writer, interface{}) error
 }
+
+type RendererFunc func(io.Writer, interface{}) error
+
+func (rf RendererFunc) Render(w io.Writer, v interface{}) error { return rf(w, v) }
 
 type Subscription struct {
 	Name string
@@ -46,25 +53,11 @@ func ErrorPlaceHolder(_ map[string]string) (*http.Response, error) {
 	return nil, ErrNoBackendDefined
 }
 
-func JSONDecoder(r io.Reader) (map[string]interface{}, error) {
-	var target map[string]interface{}
-	err := json.NewDecoder(r).Decode(&target)
-	return map[string]interface{}{"data": target}, err
-}
-
-func JSONArrayDecoder(r io.Reader) (map[string]interface{}, error) {
-	var target []map[string]interface{}
-	err := json.NewDecoder(r).Decode(&target)
-	return map[string]interface{}{"data": target}, err
-}
-
 type ErrorRenderer struct {
 	Error error
 }
 
-func (r ErrorRenderer) Render(_ io.Writer, _ interface{}) error {
-	return r.Error
-}
+func (r ErrorRenderer) Render(_ io.Writer, _ interface{}) error { return r.Error }
 
 var (
 	ErrNoResponseGeneratorDefined = fmt.Errorf("no response generator defined")

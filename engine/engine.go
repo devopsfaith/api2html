@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,12 +28,12 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 	pf := NewMustachePageFactory(e, templateStore)
 	pf.Build(cfg)
 
-	if h, err := NewErrorHandler("./static/404"); err == nil {
-		e.NoRoute(h.StaticHandlerFunc())
+	if h, err := NewStaticHandler("./static/404"); err == nil {
+		e.NoRoute(h.HandlerFunc())
 	}
 
-	if h, err := NewErrorHandler("./static/405"); err == nil {
-		e.NoMethod(h.StaticHandlerFunc())
+	if h, err := NewStaticHandler("./static/405"); err == nil {
+		e.NoMethod(h.HandlerFunc())
 	}
 
 	if devel {
@@ -88,4 +89,9 @@ func setStatics(e *gin.Engine, cfg Config) {
 		log.Println("registering the static", fileName)
 		e.StaticFile(fmt.Sprintf("/%s", fileName), fmt.Sprintf("./static/%s", fileName))
 	}
+
+	if cfg.PublicFolder != nil {
+		e.Use(static.Serve(cfg.PublicFolder.Prefix, static.LocalFile(cfg.PublicFolder.Path, false)))
+	}
+
 }

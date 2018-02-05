@@ -5,20 +5,28 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	api2htmlhttp "github.com/devopsfaith/api2html/engine/http"
 	"github.com/gin-gonic/gin"
 )
 
+// HandlerConfig defines a Handler
 type HandlerConfig struct {
-	Page              Page
-	Renderer          Renderer
+	// Page contains the page description
+	Page Page
+	// Renderer is the component responsible for rendering the responses
+	Renderer Renderer
+	// ResponseGenerator gets the data required for generating a response
+	// it can get it from a static, local source or from a remote api
+	// endpoint
 	ResponseGenerator ResponseGenerator
-	CacheControl      string
+	// CacheControl is the Cache-Control string added into the response headers
+	// if everything goes ok
+	CacheControl string
 }
 
+// DefaultHandlerConfig contains the dafult values for a HandlerConfig
 var DefaultHandlerConfig = HandlerConfig{
 	Page{},
 	EmptyRenderer,
@@ -26,63 +34,7 @@ var DefaultHandlerConfig = HandlerConfig{
 	"public, max-age=3600",
 }
 
-type ResponseGenerator func(*gin.Context) (map[string]interface{}, error)
-
-func NoopResponse(_ *gin.Context) (map[string]interface{}, error) {
-	return map[string]interface{}{}, ErrNoResponseGeneratorDefined
-}
-
-type StaticResponseGenerator struct {
-	Page Page
-}
-
-func (s *StaticResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]interface{}, error) {
-	params := map[string]string{}
-	for _, v := range c.Params {
-		params[v.Key] = v.Value
-	}
-	target := map[string]interface{}{
-		"extra":   s.Page.Extra,
-		"context": c,
-		"params":  params,
-		"helper":  &TplHelper{},
-	}
-	return target, nil
-}
-
-type DynamicResponseGenerator struct {
-	Page    Page
-	Backend Backend
-	Decoder Decoder
-}
-
-func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (map[string]interface{}, error) {
-	params := map[string]string{}
-	for _, v := range c.Params {
-		params[v.Key] = v.Value
-	}
-	headers := map[string]string{}
-	h := c.Request.Header.Get(drg.Page.Header)
-	if h != "" {
-		headers[drg.Page.Header] = h
-	}
-	resp, err := drg.Backend(params, headers)
-	if err != nil {
-		return map[string]interface{}{}, err
-	}
-	defer resp.Body.Close()
-
-	target, err := drg.Decoder(resp.Body)
-	if err != nil {
-		return map[string]interface{}{}, err
-	}
-	target["extra"] = drg.Page.Extra
-	target["context"] = c
-	target["params"] = params
-	target["helper"] = &TplHelper{}
-	return target, nil
-}
-
+// NewHandlerConfig creates a HandlerConfig from the given Page definition
 func NewHandlerConfig(page Page) HandlerConfig {
 	d, err := time.ParseDuration(page.CacheTTL)
 	if err != nil {
@@ -114,6 +66,9 @@ func NewHandlerConfig(page Page) HandlerConfig {
 	}
 }
 
+// NewHandler creates a Handler with the given configuration. The returned handler will be keeping itself
+// subscribed to the latest template updates using the given subscription channel, allowing hot
+// template reloads
 func NewHandler(cfg HandlerConfig, subscriptionChan chan Subscription) *Handler {
 	h := &Handler{
 		cfg.Page,
@@ -127,6 +82,12 @@ func NewHandler(cfg HandlerConfig, subscriptionChan chan Subscription) *Handler 
 	return h
 }
 
+// Handler is a struct that combines a renderer and a response generator for handling
+// http requests.
+//
+// The handler is able to keep itself subscribed to the last renderer version to use
+// by wrapping its Input channel into a Subscription and sending it throught the Subscribe
+// channel every time it gets a new Renderer
 type Handler struct {
 	Page              Page
 	Renderer          Renderer
@@ -147,35 +108,47 @@ func (h *Handler) updateRenderer() {
 	}
 }
 
+// HandlerFunc handles a gin request rendering the data returned by the response generator.
+// If the response generator does not return an error, it adds a Cache-Control header
 func (h *Handler) HandlerFunc(c *gin.Context) {
-	target, err := h.ResponseGenerator(c)
+	result, err := h.ResponseGenerator(c)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.Header("Cache-Control", h.CacheControl)
-	if err := h.Renderer.Render(c.Writer, &target); err != nil {
+	if err := h.Renderer.Render(c.Writer, result); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 }
 
-type TplHelper struct {
-}
-
-func (t *TplHelper) Now() string {
-	return time.Now().String()
-}
-
-func NewErrorHandler(path string) (ErrorHandler, error) {
-	templateFile, err := os.Open(path)
+// NewStaticHandler creates a StaticHandler using the content of the received path
+func NewStaticHandler(path string) (StaticHandler, error) {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println("reading", path, ":", err.Error())
-		return ErrorHandler{}, err
+		return StaticHandler{}, err
 	}
-	defer templateFile.Close()
-	data, err := ioutil.ReadAll(templateFile)
+	return StaticHandler{data}, nil
+}
+
+// StaticHandler is a Handler that writes the injected content
+type StaticHandler struct {
+	Content []byte
+}
+
+// HandlerFunc creates a gin handler that does nothing but writing the static content
+func (e *StaticHandler) HandlerFunc() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Write(e.Content)
+	}
+}
+
+// NewErrorHandler creates a ErrorHandler using the content of the received path
+func NewErrorHandler(path string) (ErrorHandler, error) {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println("reading", path, ":", err.Error())
 		return ErrorHandler{}, err
@@ -183,10 +156,13 @@ func NewErrorHandler(path string) (ErrorHandler, error) {
 	return ErrorHandler{data}, nil
 }
 
+// ErrorHandler is a Handler that writes the injected content. It's intended to be dispatched
+// by the gin special handlers (NoRoute, NoMethod) but they can also be used as regular handlers
 type ErrorHandler struct {
 	Content []byte
 }
 
+// HandlerFunc is a gin middleware for dealing with some errors
 func (e *ErrorHandler) HandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
@@ -195,12 +171,6 @@ func (e *ErrorHandler) HandlerFunc() gin.HandlerFunc {
 			return
 		}
 
-		c.Writer.Write(e.Content)
-	}
-}
-
-func (e *ErrorHandler) StaticHandlerFunc() gin.HandlerFunc {
-	return func(c *gin.Context) {
 		c.Writer.Write(e.Content)
 	}
 }
