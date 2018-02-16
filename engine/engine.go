@@ -30,10 +30,10 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 
 	if h, err := NewStaticHandler("./static/404"); err == nil {
 		e.NoRoute(h.HandlerFunc())
-	}
-
-	if h, err := NewStaticHandler("./static/405"); err == nil {
-		e.NoMethod(h.HandlerFunc())
+	} else {
+		log.Println("using the default 404 template")
+		h := StaticHandler{[]byte(default404Tmpl)}
+		e.NoRoute(h.HandlerFunc())
 	}
 
 	if devel {
@@ -72,6 +72,10 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 
 func setStatics(e *gin.Engine, cfg Config) {
 	if h, err := NewErrorHandler("./static/500"); err == nil {
+		e.Use(h.HandlerFunc())
+	} else {
+		log.Println("using the default 500 template")
+		h = ErrorHandler{[]byte(default500Tmpl)}
 		e.Use(h.HandlerFunc())
 	}
 
