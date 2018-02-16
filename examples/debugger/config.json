@@ -1,0 +1,49 @@
+{
+	"pages":[
+		{
+			"name": "home",
+			"URLPattern": "/",
+			"Template": "home",
+			"CacheTTL": "1s"
+		},
+		{
+			"name": "static",
+			"URLPattern": "/static",
+			"Template": "static",
+			"CacheTTL": "1s",
+			"extra": {
+				"metadata_title":"API2HTML static page debugger"
+			}
+		},
+		{
+			"name": "dynamic",
+			"URLPattern": "/dynamic/object/:post",
+			"BackendURLPattern": "https://jsonplaceholder.typicode.com/posts/:post",
+			"Template": "dynamic",
+			"CacheTTL": "1s",
+			"extra": {
+				"metadata_title":"API2HTML dynamic page debugger"
+			}
+		},
+		{
+			"name": "dynamic",
+			"URLPattern": "/dynamic/lists",
+			"BackendURLPattern": "https://jsonplaceholder.typicode.com/posts",
+			"Template": "dynamic",
+      		"IsArray": true,
+			"CacheTTL": "1s",
+			"extra": {
+				"metadata_title":"API2HTML dynamic page debugger"
+			}
+		}
+	],
+	"templates": {"home":"home.mustache","static":"home.mustache","dynamic":"home.mustache"},
+	"extra":{
+		"lang": "en-US",
+		"metadata_title": "API2HTML debugger"
+	},
+	"public_folder": {
+		"path_to_folder": "public",
+		"url_prefix": "/"
+	}
+}

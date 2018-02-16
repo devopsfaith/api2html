@@ -4,11 +4,30 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"testing"
+	"testing/iotest"
 )
 
-func TestNewMustacheRenderer(t *testing.T) {
+func TestMustachePartials(t *testing.T) {
+	tmpl, err := customPartialProvider.Get("api2html/debug")
+	if err != nil {
+		t.Error(err)
+	}
+	if tmpl == "" {
+		t.Error("empty partial")
+	}
+	tmpl, err = customPartialProvider.Get("_____unnknown_____")
+	if err != nil {
+		t.Error(err)
+	}
+	if tmpl != "" {
+		t.Error("unexpected result:", tmpl)
+	}
+}
+
+func TestNewMustacheRenderer_ok(t *testing.T) {
 	tmpl, err := NewMustacheRenderer(bytes.NewBufferString(`-{{ a }}-`))
 	if err != nil {
 		t.Error(err)
@@ -20,7 +39,14 @@ func TestNewMustacheRenderer(t *testing.T) {
 	}
 }
 
-func TestNewLayoutMustacheRenderer(t *testing.T) {
+func TestNewMustacheRenderer_ko(t *testing.T) {
+	_, err := NewMustacheRenderer(bytes.NewBufferString(`-{{ a `))
+	if err == nil {
+		t.Error("expecting error")
+	}
+}
+
+func TestNewLayoutMustacheRenderer_ok(t *testing.T) {
 	tmpl, err := NewLayoutMustacheRenderer(bytes.NewBufferString(`{{ a }}`), bytes.NewBufferString(`-{{{ content }}}-`))
 	if err != nil {
 		t.Error(err)
@@ -29,6 +55,17 @@ func TestNewLayoutMustacheRenderer(t *testing.T) {
 
 	if err := checkRenderer(tmpl); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestNewLayoutMustacheRenderer_ko(t *testing.T) {
+	_, err := NewLayoutMustacheRenderer(bytes.NewBufferString(`{{ a `), bytes.NewBufferString(`-{{{ content }}}-`))
+	if err == nil {
+		t.Error("expecting error")
+	}
+	_, err = NewLayoutMustacheRenderer(bytes.NewBufferString(`{{ a }}`), bytes.NewBufferString(`-{{{ content -`))
+	if err == nil {
+		t.Error("expecting error")
 	}
 }
 
@@ -80,6 +117,14 @@ func TestNewMustacheRendererMap_koNoFile(t *testing.T) {
 	if err == nil {
 		t.Error("expecting error!")
 		return
+	}
+}
+
+func Test_newMustacheTemplate(t *testing.T) {
+	b := make([]byte, 1024)
+	rand.Read(b)
+	if _, err := newMustacheTemplate(iotest.TimeoutReader(bytes.NewBuffer(b))); err == nil {
+		t.Error("expecting error!")
 	}
 }
 
