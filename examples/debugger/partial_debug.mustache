@@ -1,43 +1,77 @@
-<div>
+<div class="api2html-debug">
 	<h1>API2HTML Debugger</h1>
-    <small>page generated at {{ Helper.Now }}</small>
-    <h3>Response context</h3>
-    <div>{{ String }}</div>
+    <p class="response">Page generated at <strong>{{ Helper.Now }}</strong></p>
+    <h2>Response context</h2>
+    <div class="response">
+    <pre>{{ String }}</pre>
+    </div>
+
     <h2>Request context params</h2>
-    <div>
-        <ul>{{ #Context.params }}
-        <li><pre>{{ . }}</pre></li>{{ /Context.params }}
-        </ul>
+    <div class="response">
+        {{ #Context.params }}
+            <pre>{{ . }}</pre>
+        {{ /Context.params }}
+        {{ ^Context.params }}
+            <p>No context parameters set</p>
+        {{ /Context.params }}
     </div>
     <h2>Request context keys</h2>
-    <div>
-        <ul>{{ #Context.keys }}
-        <li><pre>{{ . }}</pre></li>{{ /Context.keys }}
-        </ul>
+    <div class="response">
+
+        {{ #Context.keys }}
+            <pre>{{ . }}</pre>
+        {{ /Context.keys }}
+        {{ ^Context.keys }}
+            <p>No context keys set</p>
+        {{ /Context.keys }}
+
     </div>
     <h2>Request params</h2>
-    <div>
-        <ul>{{ #Params }}
-        <li><pre>{{ . }}</pre></li>{{ /Params }}
-        </ul>
+    <div class="response">
+        {{ #Params }}
+        <pre>{{ . }}</pre>
+        {{ /Params }}
     </div>
     <h2>Extra data</h2>
-    <div>
-        <ul>{{ #Extra }}
-        <li><pre>{{ . }}</pre></li>{{ /Extra }}
-        </ul>
+    <div class="response">
+        {{ #Extra }}
+        <pre>{{ . }}</pre>
+        {{ /Extra }}
     </div>
-    <h2>Backend data</h2>
-    <h3>Full response (as object)</h3>
-    <div>
-        <ul>{{ #Data }}
-        <li><pre>{{ . }}</pre></li>{{ /Data }}
-        </ul>
-    </div>
-    <h3>Full response (as array)</h3>
-    <div>
-        <ul>{{ #Array }}
-        <li><pre>{{ . }}</pre></li>{{ /Array }}
-        </ul>
+    <h2>Backend response</h2>
+    <div class="response">
+        <h3>As object</h3>
+        {{ #Data }}
+        <pre>{{ . }}</pre>
+        {{ /Data }}
+
+        <h3>As array</h3>
+        {{ #Array }}
+        <pre>{{ . }}</pre>
+        {{ /Array }}
     </div>
 </div>
+<style type="text/css">
+    .api2html-debug {
+        background-color: #1c1c1d;
+        border: 1px solid #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+    }
+    .api2html-debug .response {
+
+        padding: 1em;
+    }
+    .api2html-debug pre, .api2html-debug strong {
+        color: #00FF00;
+        font-family: monospace;
+    }
+
+    .api2html-debug h1, h2, h3 {
+        margin: 0;
+        background-color: #333;
+        color: #fff;
+        padding:0.5em;
+        border-left: 4px solid #FF473B;
+    }
+</style>
