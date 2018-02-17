@@ -28,7 +28,7 @@ type EngineFactory struct {
 	Parser               func(string) (Config, error)
 	MustachePageFactory  func(*gin.Engine, *TemplateStore) MustachePageFactory
 	StaticHandlerFactory func(string) (StaticHandler, error)
-	ErrorHandlerFactory  func(string) (ErrorHandler, error)
+	ErrorHandlerFactory  func(string, int) (ErrorHandler, error)
 }
 
 // New creates a gin engine with the received config and the injected factories
@@ -117,7 +117,7 @@ func (ef EngineFactory) setStatics(e *gin.Engine, cfg Config) {
 		e.StaticFile(fmt.Sprintf("/%s", fileName), fmt.Sprintf("./static/%s", fileName))
 	}
 
-	if h, err := ef.ErrorHandlerFactory("./static/500"); err == nil {
+	if h, err := ef.ErrorHandlerFactory("./static/500", http.StatusInternalServerError); err == nil {
 		e.Use(h.HandlerFunc())
 	} else {
 		log.Println("using the default 500 template")

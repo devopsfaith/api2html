@@ -65,7 +65,7 @@ func TestNewErrorHandler(t *testing.T) {
 	}
 	defer os.Remove(fileName)
 
-	eh, err := NewErrorHandler(fileName)
+	eh, err := NewErrorHandler(fileName, 987)
 	if err != nil {
 		t.Error(err)
 		return
@@ -127,7 +127,7 @@ func TestNewStaticHandler_ko(t *testing.T) {
 }
 
 func TestNewErrorHandlerr_ko(t *testing.T) {
-	_, err := NewErrorHandler("unknown_file_not_present_in_the_fs")
+	_, err := NewErrorHandler("unknown_file_not_present_in_the_fs", 123)
 	if err == nil {
 		t.Error("error expected")
 	}

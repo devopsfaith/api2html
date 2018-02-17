@@ -38,7 +38,7 @@ var (
 	// Default404StaticHandler is the default static handler for dealing with 404 errors
 	Default404StaticHandler = StaticHandler{[]byte(default404Tmpl)}
 	// Default500StaticHandler is the default static handler for dealing with 500 errors
-	Default500StaticHandler = ErrorHandler{[]byte(default500Tmpl)}
+	Default500StaticHandler = ErrorHandler{[]byte(default500Tmpl), http.StatusInternalServerError}
 )
 
 // NewHandlerConfig creates a HandlerConfig from the given Page definition
@@ -154,19 +154,20 @@ func (e *StaticHandler) HandlerFunc() gin.HandlerFunc {
 }
 
 // NewErrorHandler creates a ErrorHandler using the content of the received path
-func NewErrorHandler(path string) (ErrorHandler, error) {
+func NewErrorHandler(path string, code int) (ErrorHandler, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println("reading", path, ":", err.Error())
 		return ErrorHandler{}, err
 	}
-	return ErrorHandler{data}, nil
+	return ErrorHandler{data, code}, nil
 }
 
 // ErrorHandler is a Handler that writes the injected content. It's intended to be dispatched
 // by the gin special handlers (NoRoute, NoMethod) but they can also be used as regular handlers
 type ErrorHandler struct {
-	Content []byte
+	Content   []byte
+	ErrorCode int
 }
 
 // HandlerFunc is a gin middleware for dealing with some errors
@@ -174,7 +175,7 @@ func (e *ErrorHandler) HandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
-		if !c.IsAborted() {
+		if !c.IsAborted() || c.Writer.Status() != e.ErrorCode {
 			return
 		}
 
