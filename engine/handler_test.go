@@ -126,7 +126,7 @@ func TestNewStaticHandler_ko(t *testing.T) {
 	}
 }
 
-func TestNewErrorHandlerr_ko(t *testing.T) {
+func TestNewErrorHandler_ko(t *testing.T) {
 	_, err := NewErrorHandler("unknown_file_not_present_in_the_fs", 123)
 	if err == nil {
 		t.Error("error expected")

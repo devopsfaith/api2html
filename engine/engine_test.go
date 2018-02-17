@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -73,6 +74,8 @@ func TestEngineFactory_New_ok(t *testing.T) {
 		t.Errorf("unexpected error: %s", err.Error())
 		return
 	}
+
+	time.Sleep(200 * time.Millisecond)
 
 	assertResponse(t, e, "/a", http.StatusOK, "-hi, stranger!-")
 	assertResponse(t, e, "/b", http.StatusNotFound, default404Tmpl)
@@ -150,6 +153,8 @@ func TestNew(t *testing.T) {
 		t.Errorf("unexpected error: %s", err.Error())
 		return
 	}
+
+	time.Sleep(200 * time.Millisecond)
 
 	assertResponse(t, e, "/a", http.StatusOK, "-hi, stranger!-")
 	assertResponse(t, e, "/b", http.StatusNotFound, "404")
