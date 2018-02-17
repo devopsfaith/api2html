@@ -21,12 +21,12 @@ func TestRender(t *testing.T) {
 
 	data := Data{
 		Config: map[string]Map{
-			"cfg1": Map{
+			"cfg1": {
 				"key1": "v1",
 			},
 		},
 		I18N: map[string]Map{
-			"I18N1": Map{
+			"I18N1": {
 				"I18N1-1": "v1",
 			},
 		},

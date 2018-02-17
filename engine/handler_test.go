@@ -136,7 +136,7 @@ func TestNewErrorHandler_ko(t *testing.T) {
 func TestNewHandler(t *testing.T) {
 	responseCtx := ResponseContext{
 		Array: []map[string]interface{}{
-			map[string]interface{}{"a": "foo"},
+			{"a": "foo"},
 		},
 	}
 	layout := "layout"

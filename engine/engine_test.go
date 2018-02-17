@@ -14,7 +14,7 @@ import (
 )
 
 func TestEngineFactory_New_koConfigParser(t *testing.T) {
-	expectedErr := fmt.Errorf("BOOOM!")
+	expectedErr := fmt.Errorf("boooom")
 	ef := EngineFactory{
 		Parser: func(path string) (Config, error) {
 			if path != "something" {
@@ -41,7 +41,7 @@ func TestEngineFactory_New_ok(t *testing.T) {
 	defer os.Remove("test_lyt")
 	expectedCfg := Config{
 		Pages: []Page{
-			Page{
+			{
 				URLPattern: "/a",
 				Layout:     "b",
 				Template:   "a",
@@ -119,7 +119,7 @@ func TestNew(t *testing.T) {
 
 	cfg := Config{
 		Pages: []Page{
-			Page{
+			{
 				URLPattern: "/a",
 				Layout:     "b",
 				Template:   "a",
