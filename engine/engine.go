@@ -14,6 +14,7 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 	return DefaultEngineFactory.New(cfgPath, devel)
 }
 
+// DefaultEngineFactory is an EngineFactory ready to be used
 var DefaultEngineFactory = EngineFactory{
 	TemplateStoreFactory: NewTemplateStore,
 	Parser:               ParseConfigFromFile,
