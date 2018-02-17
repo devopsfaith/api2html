@@ -9,31 +9,45 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// New creates a gin engine with the default EngineFactory
 func New(cfgPath string, devel bool) (*gin.Engine, error) {
-	cfg, err := ParseConfigFromFile(cfgPath)
+	return DefaultEngineFactory.New(cfgPath, devel)
+}
+
+var DefaultEngineFactory = EngineFactory{
+	TemplateStoreFactory: NewTemplateStore,
+	Parser:               ParseConfigFromFile,
+	MustachePageFactory:  NewMustachePageFactory,
+	StaticHandlerFactory: NewStaticHandler,
+	ErrorHandlerFactory:  NewErrorHandler,
+}
+
+// EngineFactory is a struct able to build api2html engines
+type EngineFactory struct {
+	TemplateStoreFactory func() *TemplateStore
+	Parser               func(string) (Config, error)
+	MustachePageFactory  func(*gin.Engine, *TemplateStore) MustachePageFactory
+	StaticHandlerFactory func(string) (StaticHandler, error)
+	ErrorHandlerFactory  func(string) (ErrorHandler, error)
+}
+
+// New creates a gin engine with the received config and the injected factories
+func (ef EngineFactory) New(cfgPath string, devel bool) (*gin.Engine, error) {
+	cfg, err := ef.Parser(cfgPath)
 	if err != nil {
 		return nil, err
 	}
 
-	templateStore := NewTemplateStore()
-	if !devel {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	e := gin.Default()
-	e.RedirectTrailingSlash = true
-	e.RedirectFixedPath = true
-
-	setStatics(e, cfg)
-
-	pf := NewMustachePageFactory(e, templateStore)
+	templateStore := ef.TemplateStoreFactory()
+	e := ef.newGinEngine(cfg, devel)
+	pf := ef.MustachePageFactory(e, templateStore)
 	pf.Build(cfg)
 
-	if h, err := NewStaticHandler("./static/404"); err == nil {
+	if h, err := ef.StaticHandlerFactory("./static/404"); err == nil {
 		e.NoRoute(h.HandlerFunc())
 	} else {
 		log.Println("using the default 404 template")
-		h := StaticHandler{[]byte(default404Tmpl)}
-		e.NoRoute(h.HandlerFunc())
+		e.NoRoute(Default404StaticHandler.HandlerFunc())
 	}
 
 	if devel {
@@ -70,13 +84,29 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 	return e, nil
 }
 
-func setStatics(e *gin.Engine, cfg Config) {
-	if h, err := NewErrorHandler("./static/500"); err == nil {
+func (ef EngineFactory) newGinEngine(cfg Config, devel bool) *gin.Engine {
+	if !devel {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	e := gin.Default()
+	e.RedirectTrailingSlash = true
+	e.RedirectFixedPath = true
+
+	ef.setStatics(e, cfg)
+
+	return e
+}
+
+func (ef EngineFactory) setStatics(e *gin.Engine, cfg Config) {
+	if cfg.PublicFolder != nil {
+		e.Use(static.Serve(cfg.PublicFolder.Prefix, static.LocalFile(cfg.PublicFolder.Path, false)))
+	}
+
+	if h, err := ef.ErrorHandlerFactory("./static/500"); err == nil {
 		e.Use(h.HandlerFunc())
 	} else {
 		log.Println("using the default 500 template")
-		h = ErrorHandler{[]byte(default500Tmpl)}
-		e.Use(h.HandlerFunc())
+		e.Use(Default500StaticHandler.HandlerFunc())
 	}
 
 	if cfg.Robots {
@@ -92,10 +122,6 @@ func setStatics(e *gin.Engine, cfg Config) {
 	for _, fileName := range cfg.StaticTXTContent {
 		log.Println("registering the static", fileName)
 		e.StaticFile(fmt.Sprintf("/%s", fileName), fmt.Sprintf("./static/%s", fileName))
-	}
-
-	if cfg.PublicFolder != nil {
-		e.Use(static.Serve(cfg.PublicFolder.Prefix, static.LocalFile(cfg.PublicFolder.Path, false)))
 	}
 
 }
