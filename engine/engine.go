@@ -102,13 +102,6 @@ func (ef EngineFactory) setStatics(e *gin.Engine, cfg Config) {
 		e.Use(static.Serve(cfg.PublicFolder.Prefix, static.LocalFile(cfg.PublicFolder.Path, false)))
 	}
 
-	if h, err := ef.ErrorHandlerFactory("./static/500"); err == nil {
-		e.Use(h.HandlerFunc())
-	} else {
-		log.Println("using the default 500 template")
-		e.Use(Default500StaticHandler.HandlerFunc())
-	}
-
 	if cfg.Robots {
 		log.Println("registering the robots file")
 		e.StaticFile("/robots.txt", "./static/robots.txt")
@@ -122,6 +115,13 @@ func (ef EngineFactory) setStatics(e *gin.Engine, cfg Config) {
 	for _, fileName := range cfg.StaticTXTContent {
 		log.Println("registering the static", fileName)
 		e.StaticFile(fmt.Sprintf("/%s", fileName), fmt.Sprintf("./static/%s", fileName))
+	}
+
+	if h, err := ef.ErrorHandlerFactory("./static/500"); err == nil {
+		e.Use(h.HandlerFunc())
+	} else {
+		log.Println("using the default 500 template")
+		e.Use(Default500StaticHandler.HandlerFunc())
 	}
 
 }
