@@ -6,7 +6,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "api2html",
-	Short: "Template Render As A Service",
+	Short: "Generate HTML on the fly from your API.",
 }
 
 // Execute executes the root command
