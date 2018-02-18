@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	newrelic "github.com/newrelic/go-agent"
+	nrgin "github.com/newrelic/go-agent/_integrations/nrgin/v1"
 )
 
 // ResponseContext is the struct ready to rendered and returned to the Handler
@@ -51,6 +53,9 @@ type StaticResponseGenerator struct {
 
 // ResponseGenerator implements the ResponseGenerator interface
 func (s *StaticResponseGenerator) ResponseGenerator(c *gin.Context) (ResponseContext, error) {
+	if newrelicApp != nil {
+		defer newrelic.StartSegment(nrgin.Transaction(c), "StaticResponseGenerator").End()
+	}
 	params := map[string]string{}
 	for _, v := range c.Params {
 		params[v.Key] = v.Value
@@ -75,6 +80,10 @@ type DynamicResponseGenerator struct {
 
 // ResponseGenerator implements the ResponseGenerator interface
 func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (ResponseContext, error) {
+	if newrelicApp != nil {
+		defer newrelic.StartSegment(nrgin.Transaction(c), "DynamicResponseGenerator").End()
+	}
+	segment := newrelic.StartSegment(nrgin.Transaction(c), "Request manipulation")
 	params := map[string]string{}
 	for _, v := range c.Params {
 		params[v.Key] = v.Value
@@ -90,13 +99,20 @@ func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (Response
 		Params:  params,
 		Helper:  &tplHelper{},
 	}
-	resp, err := drg.Backend(params, headers)
+	segment.End()
+
+	segment = newrelic.StartSegment(nrgin.Transaction(c), "Backend")
+	resp, err := drg.Backend(params, headers, c)
+	segment.End()
 	if err != nil {
 		return result, err
 	}
 
+	segment = newrelic.StartSegment(nrgin.Transaction(c), "Decoder")
 	err = drg.Decoder(resp.Body, &result)
 	resp.Body.Close()
+	segment.End()
+
 	return result, err
 }
 

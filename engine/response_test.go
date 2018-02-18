@@ -98,7 +98,7 @@ func TestDynamicResponseGenerator_koBackend(t *testing.T) {
 			Header: expectedHeader[0],
 		},
 		Decoder: JSONDecoder,
-		Backend: func(params map[string]string, headers map[string]string) (*http.Response, error) {
+		Backend: func(params map[string]string, headers map[string]string, _ *gin.Context) (*http.Response, error) {
 			if params["first"] != "foo" || params["second"] != "bar" {
 				t.Error("unexpected params:", params)
 			}
@@ -133,7 +133,7 @@ func TestDynamicResponseGenerator_koDecoder(t *testing.T) {
 	expectedResponse := "abcd"
 	subject := DynamicResponseGenerator{
 		Page: Page{Extra: map[string]interface{}{"a": 42.0}},
-		Backend: func(_ map[string]string, _ map[string]string) (*http.Response, error) {
+		Backend: func(_ map[string]string, _ map[string]string, _ *gin.Context) (*http.Response, error) {
 			return &http.Response{Body: ioutil.NopCloser(bytes.NewBufferString(expectedResponse))}, nil
 		},
 		Decoder: func(r io.Reader, c *ResponseContext) error {
@@ -168,7 +168,7 @@ func TestDynamicResponseGenerator_ok(t *testing.T) {
 	expectedResponse := "abcd"
 	subject := DynamicResponseGenerator{
 		Page: Page{Extra: map[string]interface{}{"a": 42.0}},
-		Backend: func(_ map[string]string, _ map[string]string) (*http.Response, error) {
+		Backend: func(_ map[string]string, _ map[string]string, _ *gin.Context) (*http.Response, error) {
 			return &http.Response{Body: ioutil.NopCloser(bytes.NewBufferString(expectedResponse))}, nil
 		},
 		Decoder: func(r io.Reader, c *ResponseContext) error {

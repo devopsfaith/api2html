@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	newrelic "github.com/newrelic/go-agent"
+	nrgin "github.com/newrelic/go-agent/_integrations/nrgin/v1"
 )
 
 // DefaultFactory is an Factory ready to be used
@@ -32,6 +35,18 @@ func (ef Factory) New(cfgPath string, devel bool) (*gin.Engine, error) {
 	cfg, err := ef.Parser(cfgPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if cfg.NewRelic != nil && cfg.NewRelic.License != "" {
+		nrCfg := newrelic.NewConfig(cfg.NewRelic.AppName, cfg.NewRelic.License)
+		if devel {
+			nrCfg.Logger = newrelic.NewDebugLogger(os.Stdout)
+		}
+		nrapp, err := newrelic.NewApplication(nrCfg)
+		if err != nil {
+			return nil, err
+		}
+		newrelicApp = &nrapp
 	}
 
 	templateStore := ef.TemplateStoreFactory()
@@ -88,6 +103,9 @@ func (ef Factory) newGinEngine(cfg Config, devel bool) *gin.Engine {
 	e.RedirectTrailingSlash = true
 	e.RedirectFixedPath = true
 
+	if newrelicApp != nil {
+		e.Use(nrgin.Middleware(*newrelicApp))
+	}
 	ef.setStatics(e, cfg)
 
 	return e

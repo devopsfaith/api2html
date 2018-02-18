@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	api2htmlhttp "github.com/devopsfaith/api2html/engine/http"
 	"github.com/gin-gonic/gin"
+	newrelic "github.com/newrelic/go-agent"
+	nrgin "github.com/newrelic/go-agent/_integrations/nrgin/v1"
 )
 
 // HandlerConfig defines a Handler
@@ -62,7 +63,7 @@ func NewHandlerConfig(page Page) HandlerConfig {
 	if page.IsArray {
 		decoder = JSONArrayDecoder
 	}
-	rg := DynamicResponseGenerator{page, Backend(api2htmlhttp.CachedClient(page.BackendURLPattern)), decoder}
+	rg := DynamicResponseGenerator{page, CachedClient(page.BackendURLPattern), decoder}
 
 	return HandlerConfig{
 		page,
@@ -117,12 +118,17 @@ func (h *Handler) updateRenderer() {
 // HandlerFunc handles a gin request rendering the data returned by the response generator.
 // If the response generator does not return an error, it adds a Cache-Control header
 func (h *Handler) HandlerFunc(c *gin.Context) {
+	if newrelicApp != nil {
+		nrgin.Transaction(c).SetName(h.Page.Name)
+	}
 	result, err := h.ResponseGenerator(c)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
+	if newrelicApp != nil {
+		defer newrelic.StartSegment(nrgin.Transaction(c), "Render").End()
+	}
 	c.Header("Cache-Control", h.CacheControl)
 	if err := h.Renderer.Render(c.Writer, result); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -148,6 +154,9 @@ type StaticHandler struct {
 // HandlerFunc creates a gin handler that does nothing but writing the static content
 func (e *StaticHandler) HandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if newrelicApp != nil {
+			nrgin.Transaction(c).SetName("StaticHandler")
+		}
 		c.Writer.Write(e.Content)
 	}
 }

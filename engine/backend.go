@@ -1,20 +1,19 @@
-package http
+package engine
 
 import (
 	"bytes"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gregjones/httpcache"
+	newrelic "github.com/newrelic/go-agent"
+	nrgin "github.com/newrelic/go-agent/_integrations/nrgin/v1"
 )
 
 var (
 	cachedTransport  = httpcache.NewMemoryCacheTransport()
 	cachedHTTPClient = http.Client{Transport: cachedTransport}
 )
-
-// Backend defines the signature of the function that creates a response for a request
-// to a given backend
-type Backend func(map[string]string, map[string]string) (*http.Response, error)
 
 // DefaultClient returns a Dackend to the received URLPattern with the default http client
 // from the stdlib
@@ -31,7 +30,7 @@ func CachedClient(URLPattern string) Backend {
 // NewBackend creates a Backend with the received http client and url pattern
 func NewBackend(client *http.Client, URLPattern string) Backend {
 	urlPattern := []byte(URLPattern)
-	return func(params map[string]string, headers map[string]string) (*http.Response, error) {
+	return func(params map[string]string, headers map[string]string, c *gin.Context) (*http.Response, error) {
 		req, err := http.NewRequest("GET", string(replaceParams(urlPattern, params)), nil)
 		if err != nil {
 			return nil, err
@@ -39,7 +38,16 @@ func NewBackend(client *http.Client, URLPattern string) Backend {
 		for k, v := range headers {
 			req.Header.Add(k, v)
 		}
-		return client.Do(req)
+		var s newrelic.ExternalSegment
+		if newrelicApp != nil {
+			s = newrelic.StartExternalSegment(nrgin.Transaction(c), req)
+		}
+		resp, err := client.Do(req)
+		if newrelicApp != nil {
+			s.Response = resp
+			s.End()
+		}
+		return resp, err
 	}
 }
 
