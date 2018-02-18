@@ -68,13 +68,14 @@ type ErrorRenderer struct {
 // Render implements the Renderer interface by returning the injected error
 func (r ErrorRenderer) Render(_ io.Writer, _ interface{}) error { return r.Error }
 
-var (
-	// ErrNoResponseGeneratorDefined is the error returned when no ResponseGenerator has been defined
-	ErrNoResponseGeneratorDefined = fmt.Errorf("no response generator defined")
-	// ErrNoBackendDefined is the error returned when no Backend has been defined
-	ErrNoBackendDefined = fmt.Errorf("no backend defined")
-	// ErrNoBackendDefined is the error returned when no Renderer has been defined
-	ErrNoRendererDefined = fmt.Errorf("no rendered defined")
-	// EmptyRenderer is the Renderer to be use if no other is defined
-	EmptyRenderer = ErrorRenderer{ErrNoRendererDefined}
-)
+// ErrNoResponseGeneratorDefined is the error returned when no ResponseGenerator has been defined
+var ErrNoResponseGeneratorDefined = fmt.Errorf("no response generator defined")
+
+// ErrNoBackendDefined is the error returned when no Backend has been defined
+var ErrNoBackendDefined = fmt.Errorf("no backend defined")
+
+// ErrNoRendererDefined is the error returned when no Renderer has been defined
+var ErrNoRendererDefined = fmt.Errorf("no rendered defined")
+
+// EmptyRenderer is the Renderer to be use if no other is defined
+var EmptyRenderer = ErrorRenderer{ErrNoRendererDefined}

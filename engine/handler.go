@@ -26,20 +26,19 @@ type HandlerConfig struct {
 	CacheControl string
 }
 
-var (
-	// DefaultHandlerConfig contains the dafult values for a HandlerConfig
-	DefaultHandlerConfig = HandlerConfig{
-		Page{},
-		EmptyRenderer,
-		NoopResponse,
-		"public, max-age=3600",
-	}
+// DefaultHandlerConfig contains the dafult values for a HandlerConfig
+var DefaultHandlerConfig = HandlerConfig{
+	Page{},
+	EmptyRenderer,
+	NoopResponse,
+	"public, max-age=3600",
+}
 
-	// Default404StaticHandler is the default static handler for dealing with 404 errors
-	Default404StaticHandler = StaticHandler{[]byte(default404Tmpl)}
-	// Default500StaticHandler is the default static handler for dealing with 500 errors
-	Default500StaticHandler = ErrorHandler{[]byte(default500Tmpl), http.StatusInternalServerError}
-)
+// Default404StaticHandler is the default static handler for dealing with 404 errors
+var Default404StaticHandler = StaticHandler{[]byte(default404Tmpl)}
+
+// Default500StaticHandler is the default static handler for dealing with 500 errors
+var Default500StaticHandler = ErrorHandler{[]byte(default500Tmpl), http.StatusInternalServerError}
 
 // NewHandlerConfig creates a HandlerConfig from the given Page definition
 func NewHandlerConfig(page Page) HandlerConfig {

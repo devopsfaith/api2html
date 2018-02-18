@@ -120,8 +120,26 @@ func TestNew(t *testing.T) {
 	cfg := Config{
 		Pages: []Page{
 			{
-				URLPattern: "/a",
+				URLPattern: "/ok/1",
 				Layout:     "b",
+				Template:   "a",
+				Extra: map[string]interface{}{
+					"name": "stranger",
+				},
+			},
+			{
+				URLPattern: "/ok/2",
+				Template:   "a",
+				Extra: map[string]interface{}{
+					"name": "stranger",
+				},
+			},
+			{
+				URLPattern: "/ko/1",
+			},
+			{
+				URLPattern: "/ko/2",
+				Layout:     "unknown",
 				Template:   "a",
 				Extra: map[string]interface{}{
 					"name": "stranger",
@@ -156,7 +174,10 @@ func TestNew(t *testing.T) {
 
 	time.Sleep(200 * time.Millisecond)
 
-	assertResponse(t, e, "/a", http.StatusOK, "-hi, stranger!-")
+	assertResponse(t, e, "/ok/1", http.StatusOK, "-hi, stranger!-")
+	assertResponse(t, e, "/ok/2", http.StatusOK, "hi, stranger!")
+	assertResponse(t, e, "/ko/1", http.StatusInternalServerError, "500")
+	assertResponse(t, e, "/ko/2", http.StatusInternalServerError, "500")
 	assertResponse(t, e, "/b", http.StatusNotFound, "404")
 	assertResponse(t, e, "/robots.txt", http.StatusOK, "robots.txt")
 	assertResponse(t, e, "/sitemap.xml", http.StatusOK, "sitemap.xml")

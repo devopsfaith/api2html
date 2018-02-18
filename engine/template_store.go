@@ -2,6 +2,10 @@ package engine
 
 import "sync"
 
+// NewTemplateStore creates a TemplateStore ready to be used
+//
+// The returned TemplateStore will be accepting and managing
+// subscriptions
 func NewTemplateStore() *TemplateStore {
 	store := &TemplateStore{
 		&templateStore{
@@ -15,6 +19,7 @@ func NewTemplateStore() *TemplateStore {
 	return store
 }
 
+// TemplateStore manages the loaded templates and the subscriptions
 type TemplateStore struct {
 	*templateStore
 	Subscribe chan Subscription
@@ -32,6 +37,8 @@ func (p *TemplateStore) subscribe() {
 	}
 }
 
+// Set adds or updates the renderer with the given name. After updating its internal state, it
+// alerts all the subscriptors by sending the new renderer and removes all the subscriptions.
 func (p *TemplateStore) Set(name string, tmpl Renderer) error {
 	if err := p.templateStore.Set(name, tmpl); err != nil {
 		return err
@@ -54,6 +61,7 @@ type templateStore struct {
 	mutex map[string]*sync.RWMutex
 }
 
+// Get returns a Renderer and a boolean signaling if the given name is not in the store
 func (p *templateStore) Get(name string) (Renderer, bool) {
 	m := p.getMutex(name)
 	m.RLock()

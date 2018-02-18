@@ -1,3 +1,21 @@
+// Package engine contains all the required for building and running an API2HTML server
+//
+//	func Run(cfgPath string, devel bool) error {
+//	 	errNilEngine := fmt.Errorf("serve cmd aborted: nil engine")
+//	 	e, err := engine.New(cfgPath, devel)
+//	 	if err != nil {
+//	 		log.Println("engine creation aborted:", err.Error())
+//	 		return err
+//	 	}
+//	 	if e == nil {
+//	 		log.Println("engine creation aborted:", errNilEngine.Error())
+//	 		return errNilEngine
+//	 	}
+//
+//	 	time.Sleep(time.Second)
+//
+//	 	return eW.Run(fmt.Sprintf(":%d", port))
+//	}
 package engine
 
 import (

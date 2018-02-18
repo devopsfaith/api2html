@@ -7,15 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// NewMustachePageFactory creates a MustachePageFactory with the injected params
 func NewMustachePageFactory(e *gin.Engine, ts *TemplateStore) MustachePageFactory {
 	return MustachePageFactory{e, ts}
 }
 
+// MustachePageFactory is a component that sets up the gin engine and the template store
 type MustachePageFactory struct {
 	Engine        *gin.Engine
 	TemplateStore *TemplateStore
 }
 
+// Build sets up the injected gin engine and template store depending on the contents of
+// the received configuration
 func (m *MustachePageFactory) Build(cfg Config) {
 	templates, err := NewMustacheRendererMap(cfg)
 	if err != nil {
