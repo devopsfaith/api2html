@@ -12,8 +12,9 @@ type Decoder func(io.Reader, *ResponseContext) error
 // injected ResponseContext
 func JSONDecoder(r io.Reader, c *ResponseContext) error {
 	var target map[string]interface{}
-
-	if err := json.NewDecoder(r).Decode(&target); err != nil {
+	decoder := json.NewDecoder(r)
+	decoder.UseNumber()
+	if err := decoder.Decode(&target); err != nil {
 		return err
 	}
 	c.Data = target
@@ -24,7 +25,9 @@ func JSONDecoder(r io.Reader, c *ResponseContext) error {
 // injected ResponseContext
 func JSONArrayDecoder(r io.Reader, c *ResponseContext) error {
 	var target []map[string]interface{}
-	if err := json.NewDecoder(r).Decode(&target); err != nil {
+	decoder := json.NewDecoder(r)
+	decoder.UseNumber()
+	if err := decoder.Decode(&target); err != nil {
 		return err
 	}
 	c.Array = target
