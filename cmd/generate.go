@@ -26,8 +26,8 @@ var (
 
 	generateAndWatchCmd = &cobra.Command{
 		Use:     "watch",
-		Short:   "Generate the final api2html templates.",
-		Long:    "Generate the final api2html templates.",
+		Short:   "Generate the final api2html templates after every change in the target.",
+		Long:    "Generate the final api2html templates after every change in the target.",
 		RunE:    generatorWatchWrapper{generatorWrapper{defaultGeneratorFactory}}.Watch,
 		Example: "api2html generate watch -i en_US -r partial",
 	}
@@ -70,7 +70,7 @@ type generatorWatchWrapper struct {
 }
 
 func (g generatorWatchWrapper) Watch(c *cobra.Command, p []string) error {
-	if err := g.generatorWrapper.Generate(c, p); err != nil {
+	if err := g.Generate(c, p); err != nil {
 		return err
 	}
 
@@ -80,29 +80,22 @@ func (g generatorWatchWrapper) Watch(c *cobra.Command, p []string) error {
 	}
 	defer watcher.Close()
 
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case event := <-watcher.Events:
-				log.Println("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
-					if err := g.generatorWrapper.Generate(c, p); err != nil {
-						log.Println("error:", err)
-					}
-				}
-			case err := <-watcher.Errors:
-				log.Println("error:", err)
-			}
-		}
-	}()
-
 	err = watcher.Add(basePath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	<-done
+
+	for {
+		select {
+		case event := <-watcher.Events:
+			log.Println("event:", event)
+			if err := g.Generate(c, p); err != nil {
+				return err
+			}
+		case err := <-watcher.Errors:
+			return err
+		}
+	}
 
 	return nil
 }
