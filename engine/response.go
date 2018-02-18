@@ -54,7 +54,7 @@ type StaticResponseGenerator struct {
 // ResponseGenerator implements the ResponseGenerator interface
 func (s *StaticResponseGenerator) ResponseGenerator(c *gin.Context) (ResponseContext, error) {
 	if newrelicApp != nil {
-		defer newrelic.StartSegment(nrgin.Transaction(c), "StaticResponseGenerator").End()
+		defer newrelic.StartSegment(nrgin.Transaction(c), "Request manipulation").End()
 	}
 	params := map[string]string{}
 	for _, v := range c.Params {
@@ -80,10 +80,11 @@ type DynamicResponseGenerator struct {
 
 // ResponseGenerator implements the ResponseGenerator interface
 func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (ResponseContext, error) {
+	var segment newrelic.Segment
 	if newrelicApp != nil {
-		defer newrelic.StartSegment(nrgin.Transaction(c), "DynamicResponseGenerator").End()
+		segment = newrelic.StartSegment(nrgin.Transaction(c), "Request manipulation")
 	}
-	segment := newrelic.StartSegment(nrgin.Transaction(c), "Request manipulation")
+
 	params := map[string]string{}
 	for _, v := range c.Params {
 		params[v.Key] = v.Value
@@ -101,14 +102,14 @@ func (drg *DynamicResponseGenerator) ResponseGenerator(c *gin.Context) (Response
 	}
 	segment.End()
 
-	segment = newrelic.StartSegment(nrgin.Transaction(c), "Backend")
 	resp, err := drg.Backend(params, headers, c)
-	segment.End()
 	if err != nil {
 		return result, err
 	}
 
-	segment = newrelic.StartSegment(nrgin.Transaction(c), "Decoder")
+	if newrelicApp != nil {
+		segment = newrelic.StartSegment(nrgin.Transaction(c), "Decoder")
+	}
 	err = drg.Decoder(resp.Body, &result)
 	resp.Body.Close()
 	segment.End()

@@ -30,7 +30,13 @@ func CachedClient(URLPattern string) Backend {
 // NewBackend creates a Backend with the received http client and url pattern
 func NewBackend(client *http.Client, URLPattern string) Backend {
 	urlPattern := []byte(URLPattern)
+	actualTransport := client.Transport
 	return func(params map[string]string, headers map[string]string, c *gin.Context) (*http.Response, error) {
+		if newrelicApp != nil {
+			defer newrelic.StartSegment(nrgin.Transaction(c), "Backend").End()
+			client.Transport = newrelic.NewRoundTripper(nrgin.Transaction(c), actualTransport)
+		}
+
 		req, err := http.NewRequest("GET", string(replaceParams(urlPattern, params)), nil)
 		if err != nil {
 			return nil, err
@@ -38,16 +44,7 @@ func NewBackend(client *http.Client, URLPattern string) Backend {
 		for k, v := range headers {
 			req.Header.Add(k, v)
 		}
-		var s newrelic.ExternalSegment
-		if newrelicApp != nil {
-			s = newrelic.StartExternalSegment(nrgin.Transaction(c), req)
-		}
-		resp, err := client.Do(req)
-		if newrelicApp != nil {
-			s.Response = resp
-			s.End()
-		}
-		return resp, err
+		return client.Do(req)
 	}
 }
 
