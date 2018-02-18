@@ -20,127 +20,87 @@ package engine
 
 import (
 	"fmt"
-	"log"
+	"io"
 	"net/http"
 
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
-// New creates a gin engine with the default EngineFactory
+// Config is a struct with all the required definitions for building an API2HTML engine
+type Config struct {
+	Pages            []Page                 `json:"pages"`
+	StaticTXTContent []string               `json:"static_txt_content"`
+	Robots           bool                   `json:"robots"`
+	Sitemap          bool                   `json:"sitemap"`
+	Templates        map[string]string      `json:"templates"`
+	Layouts          map[string]string      `json:"layouts"`
+	Extra            map[string]interface{} `json:"extra"`
+	PublicFolder     *PublicFolder          `json:"public_folder"`
+}
+
+// PublicFolder contains the info regarding the static contents to be served
+type PublicFolder struct {
+	Path   string `json:"path_to_folder"`
+	Prefix string `json:"url_prefix"`
+}
+
+// Page defines the behaviour of the engine for a given URL pattern
+type Page struct {
+	Name              string
+	URLPattern        string
+	BackendURLPattern string
+	Template          string
+	Layout            string
+	CacheTTL          string
+	Header            string
+	IsArray           bool
+	Extra             map[string]interface{}
+}
+
+// New creates a gin engine with the default Factory
 func New(cfgPath string, devel bool) (*gin.Engine, error) {
-	return DefaultEngineFactory.New(cfgPath, devel)
+	return DefaultFactory.New(cfgPath, devel)
 }
 
-// DefaultEngineFactory is an EngineFactory ready to be used
-var DefaultEngineFactory = EngineFactory{
-	TemplateStoreFactory: NewTemplateStore,
-	Parser:               ParseConfigFromFile,
-	MustachePageFactory:  NewMustachePageFactory,
-	StaticHandlerFactory: NewStaticHandler,
-	ErrorHandlerFactory:  NewErrorHandler,
+// Backend defines the signature of the function that creates a response for a request
+// to a given backend
+type Backend func(params map[string]string, headers map[string]string) (*http.Response, error)
+
+// Renderer defines the interface for the template renderers
+type Renderer interface {
+	Render(io.Writer, interface{}) error
 }
 
-// EngineFactory is a struct able to build api2html engines
-type EngineFactory struct {
-	TemplateStoreFactory func() *TemplateStore
-	Parser               func(string) (Config, error)
-	MustachePageFactory  func(*gin.Engine, *TemplateStore) MustachePageFactory
-	StaticHandlerFactory func(string) (StaticHandler, error)
-	ErrorHandlerFactory  func(string, int) (ErrorHandler, error)
+// RendererFunc is a function implementing the Renderer interface
+type RendererFunc func(io.Writer, interface{}) error
+
+// Render implements the Renderer interface
+func (rf RendererFunc) Render(w io.Writer, v interface{}) error { return rf(w, v) }
+
+// Subscription is a struct to be used to be notified after a change in the watched renderer
+type Subscription struct {
+	// Name is the name to watch
+	Name string
+	// In is the channel where the new renderer should be sent after a change
+	In chan Renderer
 }
 
-// New creates a gin engine with the received config and the injected factories
-func (ef EngineFactory) New(cfgPath string, devel bool) (*gin.Engine, error) {
-	cfg, err := ef.Parser(cfgPath)
-	if err != nil {
-		return nil, err
-	}
-
-	templateStore := ef.TemplateStoreFactory()
-	e := ef.newGinEngine(cfg, devel)
-	pf := ef.MustachePageFactory(e, templateStore)
-	pf.Build(cfg)
-
-	if h, err := ef.StaticHandlerFactory("./static/404"); err == nil {
-		e.NoRoute(h.HandlerFunc())
-	} else {
-		log.Println("using the default 404 template")
-		e.NoRoute(Default404StaticHandler.HandlerFunc())
-	}
-
-	if devel {
-		e.PUT("/template/:templateName", func(c *gin.Context) {
-			file, err := c.FormFile("file")
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
-			f, err := file.Open()
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
-			defer f.Close()
-
-			tmp, err := NewMustacheRenderer(f)
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
-			templateName := c.Param("templateName")
-			if err := templateStore.Set(templateName, tmp); err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
-			c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded and stored as [%s]!", templateName, file.Filename))
-		})
-	}
-	return e, nil
+// ErrorRenderer is a renderer that always returns the injected error
+type ErrorRenderer struct {
+	Error error
 }
 
-func (ef EngineFactory) newGinEngine(cfg Config, devel bool) *gin.Engine {
-	if !devel {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	e := gin.Default()
-	e.RedirectTrailingSlash = true
-	e.RedirectFixedPath = true
+// Render implements the Renderer interface by returning the injected error
+func (r ErrorRenderer) Render(_ io.Writer, _ interface{}) error { return r.Error }
 
-	ef.setStatics(e, cfg)
+// ErrNoResponseGeneratorDefined is the error returned when no ResponseGenerator has been defined
+var ErrNoResponseGeneratorDefined = fmt.Errorf("no response generator defined")
 
-	return e
-}
+// ErrNoBackendDefined is the error returned when no Backend has been defined
+var ErrNoBackendDefined = fmt.Errorf("no backend defined")
 
-func (ef EngineFactory) setStatics(e *gin.Engine, cfg Config) {
-	if cfg.PublicFolder != nil {
-		e.Use(static.Serve(cfg.PublicFolder.Prefix, static.LocalFile(cfg.PublicFolder.Path, false)))
-	}
+// ErrNoRendererDefined is the error returned when no Renderer has been defined
+var ErrNoRendererDefined = fmt.Errorf("no rendered defined")
 
-	if cfg.Robots {
-		log.Println("registering the robots file")
-		e.StaticFile("/robots.txt", "./static/robots.txt")
-	}
-
-	if cfg.Sitemap {
-		log.Println("registering the sitemap file")
-		e.StaticFile("/sitemap.xml", "./static/sitemap.xml")
-	}
-
-	for _, fileName := range cfg.StaticTXTContent {
-		log.Println("registering the static", fileName)
-		e.StaticFile(fmt.Sprintf("/%s", fileName), fmt.Sprintf("./static/%s", fileName))
-	}
-
-	if h, err := ef.ErrorHandlerFactory("./static/500", http.StatusInternalServerError); err == nil {
-		e.Use(h.HandlerFunc())
-	} else {
-		log.Println("using the default 500 template")
-		e.Use(Default500StaticHandler.HandlerFunc())
-	}
-
-}
+// EmptyRenderer is the Renderer to be use if no other is defined
+var EmptyRenderer = ErrorRenderer{ErrNoRendererDefined}
