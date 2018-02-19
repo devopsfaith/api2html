@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	newrelic "github.com/newrelic/go-agent"
 )
 
 // Config is a struct with all the required definitions for building an API2HTML engine
@@ -36,12 +37,19 @@ type Config struct {
 	Layouts          map[string]string      `json:"layouts"`
 	Extra            map[string]interface{} `json:"extra"`
 	PublicFolder     *PublicFolder          `json:"public_folder"`
+	NewRelic         *NewRelic              `json:"newrelic"`
 }
 
 // PublicFolder contains the info regarding the static contents to be served
 type PublicFolder struct {
 	Path   string `json:"path_to_folder"`
 	Prefix string `json:"url_prefix"`
+}
+
+// NewRelic contains the info regarding the app name and the newrelic license key
+type NewRelic struct {
+	AppName string `json:"app_name"`
+	License string `json:"license"`
 }
 
 // Page defines the behaviour of the engine for a given URL pattern
@@ -64,7 +72,7 @@ func New(cfgPath string, devel bool) (*gin.Engine, error) {
 
 // Backend defines the signature of the function that creates a response for a request
 // to a given backend
-type Backend func(params map[string]string, headers map[string]string) (*http.Response, error)
+type Backend func(params map[string]string, headers map[string]string, c *gin.Context) (*http.Response, error)
 
 // Renderer defines the interface for the template renderers
 type Renderer interface {
@@ -104,3 +112,5 @@ var ErrNoRendererDefined = fmt.Errorf("no rendered defined")
 
 // EmptyRenderer is the Renderer to be use if no other is defined
 var EmptyRenderer = ErrorRenderer{ErrNoRendererDefined}
+
+var newrelicApp *newrelic.Application

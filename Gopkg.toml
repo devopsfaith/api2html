@@ -30,3 +30,7 @@
   non-go = true
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/newrelic/go-agent"
+  version = "1.11.0"

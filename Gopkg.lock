@@ -66,6 +66,21 @@
   version = "v0.0.3"
 
 [[projects]]
+  name = "github.com/newrelic/go-agent"
+  packages = [
+    ".",
+    "_integrations/nrgin/v1",
+    "internal",
+    "internal/cat",
+    "internal/jsonx",
+    "internal/logger",
+    "internal/sysinfo",
+    "internal/utilization"
+  ]
+  revision = "f5bce3387232559bcbe6a5f8227c4bf508dac1ba"
+  version = "v1.11.0"
+
+[[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
   revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
@@ -104,6 +119,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b9e874f9e2c4d7f95677033feac1df8bbef96630fbef806bc64de0d7ed18c435"
+  inputs-digest = "35a9f716a4ac45d2b81ffc8b9b1d7d3e054c2b420d967204824e21c682f066d3"
   solver-name = "gps-cdcl"
   solver-version = 1
