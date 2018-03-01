@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -72,6 +73,10 @@ func TestFactory_New_ok(t *testing.T) {
 		t.Errorf("unexpected error: %s", err.Error())
 		return
 	}
+
+	req, _ := http.NewRequest("PUT", "/template/test", nil)
+	resp := httptest.NewRecorder()
+	e.ServeHTTP(resp, req)
 
 	time.Sleep(200 * time.Millisecond)
 

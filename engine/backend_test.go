@@ -2,6 +2,8 @@ package engine
 
 import (
 	"bytes"
+	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -20,10 +22,27 @@ var (
 
 func TestNewBackend(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	backend := DefaultClient(string(urlPattern))
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Hi")
+		if v, ok := r.Header["X-Test"]; ok {
+			if v[0] != "testing" {
+				t.Error("Invalid header content.")
+			}
+		}
+		if r.URL.RequestURI() != "/test/replacetest" {
+			fmt.Println(r.URL.RequestURI())
+			t.Error("Invalid URL.")
+		}
+	}))
+	defer mockServer.Close()
+	backend := DefaultClient(fmt.Sprintf("%s%s", mockServer.URL, string(urlPattern)))
 	context, _ := gin.CreateTestContext(httptest.NewRecorder())
-	if _, err := backend(params, headers, context); err != nil {
+	resp, err := backend(params, headers, context)
+	if err != nil {
 		t.Errorf("Backend response error: %s", err.Error())
+	}
+	if resp.StatusCode != 200 {
+		t.Error("Invalid status code.")
 	}
 }
 
