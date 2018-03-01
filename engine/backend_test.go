@@ -22,8 +22,7 @@ func TestNewBackend(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	backend := DefaultClient(string(urlPattern))
 	context, _ := gin.CreateTestContext(httptest.NewRecorder())
-	_, err := backend(params, headers, context)
-	if err != nil {
+	if _, err := backend(params, headers, context); err != nil {
 		t.Errorf("Backend response error: %s", err.Error())
 	}
 }
