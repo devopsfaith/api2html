@@ -123,6 +123,8 @@ func TestFactory_New_reloadTemplate(t *testing.T) {
 		return
 	}
 
+	time.Sleep(200 * time.Millisecond)
+
 	// Non-existant file param
 	req, _ := http.NewRequest("PUT", "/template/a", nil)
 	resp := httptest.NewRecorder()
@@ -135,7 +137,6 @@ func TestFactory_New_reloadTemplate(t *testing.T) {
 	}
 	resp = httptest.NewRecorder()
 	e.ServeHTTP(resp, req)
-	time.Sleep(200 * time.Millisecond)
 
 	if statusCode := resp.Result().StatusCode; statusCode != http.StatusInternalServerError {
 		t.Errorf("[%s] unexpected status code: %d (%v)", "/template/a", statusCode, resp.Result())
