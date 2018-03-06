@@ -167,7 +167,7 @@ func putTemplateForm(url, tmpl string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("PUT", "/template/a", buff)
+	req, err := http.NewRequest("PUT", url, buff)
 	if err == nil {
 		req.Header.Set("Content-Type", tmplWriter.FormDataContentType())
 	}
