@@ -3,6 +3,7 @@
 GOLANG_VERSION=1.9.3-alpine3.7
 DEP_VERSION=0.4.1
 OS=$(shell uname | tr '[:upper:]' '[:lower:]')
+PACKAGES=$(shell go list ./...)
 
 all: deps test build
 
@@ -20,7 +21,7 @@ deps:
 	@echo ""
 
 test:
-	go test -cover -v ./...
+	go test -cover -v $(PACKAGES)
 
 build:
 	@echo "Building the binary..."
@@ -33,3 +34,7 @@ docker: server_build
 
 server_build: deps
 	docker run --rm -it -e "GOPATH=/go" -v "${PWD}:/go/src/github.com/devopsfaith/api2html" -w /go/src/github.com/devopsfaith/api2html golang:${GOLANG_VERSION} go build -o api2html
+
+coveralls: all
+	go get github.com/mattn/goveralls
+	sh coverage.sh --coveralls

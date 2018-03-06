@@ -7,4 +7,4 @@ before_install:
   - make prepare
 
 script:
-  - make
+  - make coveralls
