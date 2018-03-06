@@ -92,7 +92,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("unexpected error: %s", err.Error())
 		return
 	}
-	if err := ioutil.WriteFile("public/config.json", data, 0644); err != nil {
+	if err = ioutil.WriteFile("public/config.json", data, 0644); err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 		return
 	}

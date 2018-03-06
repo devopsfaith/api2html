@@ -26,7 +26,7 @@ func TestParseConfigFromFile_wrongConfig(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if _, err := f.WriteString("{"); err != nil {
+	if _, err = f.WriteString("{"); err != nil {
 		t.Error(err)
 		return
 	}

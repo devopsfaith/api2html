@@ -193,7 +193,7 @@ func TestNewHandler(t *testing.T) {
 			t.Errorf("unexpected value %v", tmp)
 			return nil
 		}
-		_, err := w.Write([]byte(responseBody))
+		_, err = w.Write([]byte(responseBody))
 		return err
 	})
 	<-subscriptionChan
