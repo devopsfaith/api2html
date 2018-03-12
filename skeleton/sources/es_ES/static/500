@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="<%Config.site.lang%>">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Language" content="<%Config.site.lang%>" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<title>Boom!</title>
+</head>
+<body class="text-center">
+	<h1 class="my-5">La respuesta de la API se volvi&oacute; loca!</h1>
+	<p>Hubo un problema con la respuesta de la API y fuí incapaz de procesarla.</p>
+	<p>Puede que quieras personalizar este fichero editando <code>static/500</code></p>
+</body>

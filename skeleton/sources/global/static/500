@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="<%Config.site.lang%>">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Language" content="<%Config.site.lang%>" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<title>Boom!</title>
+</head>
+<body class="text-center">
+	<h1 class="my-5">API response went wild!</h1>
+	<p>The response from the API was weird an unable to process it.</p>
+	<p>You might want to customize this file by editing <code>static/500</code></p>
+</body>
