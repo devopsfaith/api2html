@@ -23,7 +23,7 @@ func Test_defaultGeneratorFactory(t *testing.T) {
 }
 
 func Test_generatorWrapper_koErroredGenerator(t *testing.T) {
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 
 	subject := generatorWrapper{func(_, _ string) generator.Generator {
 		return erroredGenerator{expectedError}
@@ -101,7 +101,7 @@ func Test_generatorWrapper(t *testing.T) {
 }
 
 func Test_generatorWatchWrapper_koErroredGenerator(t *testing.T) {
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 
 	subject := generatorWatchWrapper{generatorWrapper{func(_, _ string) generator.Generator {
 		return erroredGenerator{expectedError}
@@ -122,7 +122,7 @@ func Test_generatorWatchWrapper_koErroredGeneratorAfterChange(t *testing.T) {
 	}
 	defer os.RemoveAll(name)
 
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 	var counter uint64
 	isos = "*"
 	basePath = name

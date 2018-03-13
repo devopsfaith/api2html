@@ -39,7 +39,7 @@ func Test_defaultEngineFactory(t *testing.T) {
 }
 
 func Test_serveWrapper_koErroredEngineFactory(t *testing.T) {
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 	subject := serveWrapper{erroredEngineFactory(expectedError)}
 
 	if err := subject.Serve(nil, []string{}); err == nil {
@@ -62,7 +62,7 @@ func Test_serveWrapper_koErroredEngine(t *testing.T) {
 		return
 	}
 
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 	subject = serveWrapper{customEngineFactory(erroredEngine{expectedError})}
 
 	if err := subject.Serve(nil, []string{}); err == nil {
