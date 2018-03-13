@@ -64,9 +64,9 @@ func (s *statikSkel) Create() error {
 			fmt.Printf("opening file %s: %s\n", name, err.Error())
 			return err
 		}
-		defer f.Close()
 		buff := new(bytes.Buffer)
 		_, err = buff.ReadFrom(f)
+		f.Close()
 		if err != nil {
 			return err
 		}
