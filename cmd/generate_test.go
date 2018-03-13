@@ -18,7 +18,7 @@ func Test_defaultGeneratorFactory(t *testing.T) {
 	switch g.(type) {
 	case *generator.BasicGenerator:
 	default:
-		t.Errorf("unexpected generator type: %t", g)
+		t.Errorf("unexpected generator type: %T", g)
 	}
 }
 

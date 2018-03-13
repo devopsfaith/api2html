@@ -34,7 +34,7 @@ func Test_defaultEngineFactory(t *testing.T) {
 	switch g.(type) {
 	case *gin.Engine:
 	default:
-		t.Errorf("unexpected engine type: %t", g)
+		t.Errorf("unexpected engine type: %T", g)
 	}
 }
 
