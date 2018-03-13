@@ -2,7 +2,6 @@ package skeleton
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,9 +12,38 @@ import (
 	"github.com/rakyll/statik/fs"
 )
 
+var (
+	blogContents = []string{
+		"/blog/config/es_ES/config.ini",
+		"/blog/config/es_ES/routes.ini",
+		"/blog/config/global/config.ini",
+		"/blog/config/global/routes.ini",
+		"/blog/i18n/es_ES.ini",
+		"/blog/i18n/en_US.ini",
+		"/blog/sources/es_ES/static/404",
+		"/blog/sources/es_ES/static/500",
+		"/blog/sources/es_ES/tmpl/home.mustache",
+		"/blog/sources/global/config.json",
+		"/blog/sources/global/Dockerfile",
+		"/blog/sources/global/static/404",
+		"/blog/sources/global/static/500",
+		"/blog/sources/global/static/hello.txt",
+		"/blog/sources/global/static/robots.txt",
+		"/blog/sources/global/static/sitemap.xml",
+		"/blog/sources/global/tmpl/home.mustache",
+		"/blog/sources/global/tmpl/main_layout.mustache",
+		"/blog/sources/global/tmpl/post.mustache",
+	}
+)
+
 // New returns a statikFS Skel
-func New(outputPath string) Skel {
-	return &statikSkel{outputPath: outputPath}
+func New(outputPath string, fileList []string) Skel {
+	return &statikSkel{outputPath: outputPath, fileList: fileList}
+}
+
+// NewBlog returns a statikSkel with the blog example contents
+func NewBlog(outputPath string) Skel {
+	return &statikSkel{outputPath: outputPath, fileList: blogContents}
 }
 
 // Skel defines the interface for creating skeleton files
@@ -25,6 +53,7 @@ type Skel interface {
 
 type statikSkel struct {
 	outputPath string
+	fileList   []string
 }
 
 // Generate the skel from the statikFS
@@ -34,31 +63,7 @@ func (s *statikSkel) Create() error {
 		return err
 	}
 
-	if _, err := os.Stat(s.outputPath); err == nil {
-		return errors.New("output directory already exists")
-	}
-
-	for _, name := range []string{
-		"/config/es_ES/config.ini",
-		"/config/es_ES/routes.ini",
-		"/config/global/config.ini",
-		"/config/global/routes.ini",
-		"/i18n/es_ES.ini",
-		"/i18n/en_US.ini",
-		"/sources/es_ES/static/404",
-		"/sources/es_ES/static/500",
-		"/sources/es_ES/tmpl/home.mustache",
-		"/sources/global/config.json",
-		"/sources/global/Dockerfile",
-		"/sources/global/static/404",
-		"/sources/global/static/500",
-		"/sources/global/static/hello.txt",
-		"/sources/global/static/robots.txt",
-		"/sources/global/static/sitemap.xml",
-		"/sources/global/tmpl/home.mustache",
-		"/sources/global/tmpl/main_layout.mustache",
-		"/sources/global/tmpl/post.mustache",
-	} {
+	for _, name := range s.fileList {
 		f, err := statikFS.Open(name)
 		if err != nil {
 			fmt.Printf("opening file %s: %s\n", name, err.Error())
@@ -70,19 +75,19 @@ func (s *statikSkel) Create() error {
 		if err != nil {
 			return err
 		}
-		path := fmt.Sprintf("%s/%s", s.outputPath, filepath.Dir(name))
+		path := filepath.Join(s.outputPath, filepath.Dir(name))
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			err = os.MkdirAll(path, os.ModePerm)
 			if err != nil {
 				return err
 			}
 		}
-
-		err = ioutil.WriteFile(fmt.Sprintf("%s%s", s.outputPath, name), buff.Bytes(), os.ModePerm)
+		filename := filepath.Join(s.outputPath, name)
+		err = ioutil.WriteFile(filename, buff.Bytes(), os.ModePerm)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Creating skeleton file: %s%s\n", s.outputPath, name)
+		fmt.Printf("Creating skeleton file: %s\n", filename)
 	}
 	return nil
 }

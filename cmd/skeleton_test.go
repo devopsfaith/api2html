@@ -9,7 +9,7 @@ import (
 )
 
 func Test_defaultSkelFactory(t *testing.T) {
-	g := defaultSkelFactory("test")
+	g := defaultBlogSkelFactory("test")
 	switch g.(type) {
 	case skeleton.Skel:
 	default:
@@ -37,11 +37,11 @@ func Test_skelWrapper(t *testing.T) {
 		return simpleSkel{outputPath}
 	}}
 
-	defer os.Remove("skel_example")
+	defer os.Remove("blog_example")
 	if err := skel.Create(nil, []string{}); err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
-	if _, err := os.Stat("skel_example"); err != nil {
+	if _, err := os.Stat("blog_example"); err != nil {
 		t.Errorf("cannot locate test output dir: %s", err.Error())
 	}
 }

@@ -9,25 +9,40 @@ var (
 	outputPath string
 
 	skelCmd = &cobra.Command{
-		Use:     "skeleton",
-		Short:   "Run the api2html server.",
-		Long:    "Run the api2html server.",
-		RunE:    skelWrapper{defaultSkelFactory}.Create,
-		Aliases: []string{"skel"},
-		Example: "api2html skeleton -o skel_example",
+		Use:     "skel",
+		Short:   "skeleton command",
+		Aliases: []string{"skeleton"},
+		Example: "api2html skel",
+	}
+
+	createCmd = &cobra.Command{
+		Use:     "create",
+		Short:   "Creates a skeleton structure.",
+		Example: "api2html skel create",
+	}
+
+	blogCmd = &cobra.Command{
+		Use:     "blog",
+		Short:   "Creates the blog skeleton example.",
+		RunE:    skelWrapper{defaultBlogSkelFactory}.Create,
+		Example: "api2html skel create blog",
 	}
 )
 
 func init() {
 	rootCmd.AddCommand(skelCmd)
+	skelCmd.AddCommand(createCmd)
 
-	skelCmd.PersistentFlags().StringVarP(&outputPath, "outputPath", "o", "skel_example", "Output path for the skel generation")
+	blogCmd.PersistentFlags().StringVarP(&outputPath, "outputPath", "o", "blog_example", "Output path for the blog example generation")
+
+	createCmd.AddCommand(blogCmd)
+
 }
 
 type skelFactory func(outputPath string) skeleton.Skel
 
-func defaultSkelFactory(outputPath string) skeleton.Skel {
-	return skeleton.New(outputPath)
+func defaultBlogSkelFactory(outputPath string) skeleton.Skel {
+	return skeleton.NewBlog(outputPath)
 }
 
 type skelWrapper struct {
