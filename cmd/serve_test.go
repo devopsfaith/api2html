@@ -18,8 +18,8 @@ func Test_defaultEngineFactory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err := json.NewEncoder(f).Encode(&cfg); err != nil {
-		t.Error(err)
+	if jerr := json.NewEncoder(f).Encode(&cfg); jerr != nil {
+		t.Error(jerr)
 		return
 	}
 	f.Close()

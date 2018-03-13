@@ -155,10 +155,10 @@ func Test_generatorWatchWrapper_koErroredGeneratorAfterChange(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	go func() {
 		wg.Add(1)
-		if err := subject.Watch(nil, []string{}); err == nil {
+		if werr := subject.Watch(nil, []string{}); werr == nil {
 			t.Error("expecting error!")
-		} else if err != expectedError {
-			t.Errorf("unexpected error! want: %s, got: %s", expectedError.Error(), err.Error())
+		} else if werr != expectedError {
+			t.Errorf("unexpected error! want: %s, got: %s", expectedError.Error(), werr.Error())
 		}
 		wg.Done()
 	}()
