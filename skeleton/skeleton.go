@@ -66,7 +66,7 @@ func (s *statikSkel) Create() error {
 		}
 		defer f.Close()
 		buff := new(bytes.Buffer)
-		buff.ReadFrom(f)
+		_, err = buff.ReadFrom(f)
 		if err != nil {
 			return err
 		}
