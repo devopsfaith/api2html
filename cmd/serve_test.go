@@ -18,8 +18,8 @@ func Test_defaultEngineFactory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err := json.NewEncoder(f).Encode(&cfg); err != nil {
-		t.Error(err)
+	if jerr := json.NewEncoder(f).Encode(&cfg); jerr != nil {
+		t.Error(jerr)
 		return
 	}
 	f.Close()
@@ -34,12 +34,12 @@ func Test_defaultEngineFactory(t *testing.T) {
 	switch g.(type) {
 	case *gin.Engine:
 	default:
-		t.Errorf("unexpected engine type: %t", g)
+		t.Errorf("unexpected engine type: %T", g)
 	}
 }
 
 func Test_serveWrapper_koErroredEngineFactory(t *testing.T) {
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 	subject := serveWrapper{erroredEngineFactory(expectedError)}
 
 	if err := subject.Serve(nil, []string{}); err == nil {
@@ -62,7 +62,7 @@ func Test_serveWrapper_koErroredEngine(t *testing.T) {
 		return
 	}
 
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 	subject = serveWrapper{customEngineFactory(erroredEngine{expectedError})}
 
 	if err := subject.Serve(nil, []string{}); err == nil {

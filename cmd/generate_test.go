@@ -18,12 +18,12 @@ func Test_defaultGeneratorFactory(t *testing.T) {
 	switch g.(type) {
 	case *generator.BasicGenerator:
 	default:
-		t.Errorf("unexpected generator type: %t", g)
+		t.Errorf("unexpected generator type: %T", g)
 	}
 }
 
 func Test_generatorWrapper_koErroredGenerator(t *testing.T) {
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 
 	subject := generatorWrapper{func(_, _ string) generator.Generator {
 		return erroredGenerator{expectedError}
@@ -101,7 +101,7 @@ func Test_generatorWrapper(t *testing.T) {
 }
 
 func Test_generatorWatchWrapper_koErroredGenerator(t *testing.T) {
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 
 	subject := generatorWatchWrapper{generatorWrapper{func(_, _ string) generator.Generator {
 		return erroredGenerator{expectedError}
@@ -122,7 +122,7 @@ func Test_generatorWatchWrapper_koErroredGeneratorAfterChange(t *testing.T) {
 	}
 	defer os.RemoveAll(name)
 
-	expectedError := fmt.Errorf("expect me!")
+	expectedError := fmt.Errorf("expect me")
 	var counter uint64
 	isos = "*"
 	basePath = name
@@ -155,10 +155,10 @@ func Test_generatorWatchWrapper_koErroredGeneratorAfterChange(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	go func() {
 		wg.Add(1)
-		if err := subject.Watch(nil, []string{}); err == nil {
+		if werr := subject.Watch(nil, []string{}); werr == nil {
 			t.Error("expecting error!")
-		} else if err != expectedError {
-			t.Errorf("unexpected error! want: %s, got: %s", expectedError.Error(), err.Error())
+		} else if werr != expectedError {
+			t.Errorf("unexpected error! want: %s, got: %s", expectedError.Error(), werr.Error())
 		}
 		wg.Done()
 	}()

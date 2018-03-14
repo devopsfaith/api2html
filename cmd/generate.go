@@ -96,6 +96,4 @@ func (g generatorWatchWrapper) Watch(c *cobra.Command, p []string) error {
 			return err
 		}
 	}
-
-	return nil
 }
