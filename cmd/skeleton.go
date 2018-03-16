@@ -18,24 +18,23 @@ var (
 	createCmd = &cobra.Command{
 		Use:     "create",
 		Short:   "Creates a skeleton structure.",
-		Example: "api2html skel create",
+		Example: "api2html skel create -o outputPath <skelname>",
 	}
 
 	blogCmd = &cobra.Command{
 		Use:     "blog",
 		Short:   "Creates the blog skeleton example.",
 		RunE:    skelWrapper{defaultBlogSkelFactory}.Create,
-		Example: "api2html skel create blog",
+		Example: "api2html skel create -o outputPath blog",
 	}
 )
 
 func init() {
 	rootCmd.AddCommand(skelCmd)
 	skelCmd.AddCommand(createCmd)
-
-	blogCmd.PersistentFlags().StringVarP(&outputPath, "outputPath", "o", "blog_example", "Output path for the blog example generation")
-
 	createCmd.AddCommand(blogCmd)
+
+	createCmd.PersistentFlags().StringVarP(&outputPath, "outputPath", "o", "example", "Output path for the example generation skel")
 
 }
 
