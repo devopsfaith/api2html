@@ -37,11 +37,11 @@ func Test_skelWrapper(t *testing.T) {
 		return simpleSkel{outputPath}
 	}}
 
-	defer os.Remove("blog_example")
+	defer os.Remove("example")
 	if err := skel.Create(nil, []string{}); err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
-	if _, err := os.Stat("blog_example"); err != nil {
+	if _, err := os.Stat("example"); err != nil {
 		t.Errorf("cannot locate test output dir: %s", err.Error())
 	}
 }
