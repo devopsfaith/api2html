@@ -1,5 +1,7 @@
 package main
 
+//go:generate statik -src=skeleton/files
+
 import (
 	"log"
 

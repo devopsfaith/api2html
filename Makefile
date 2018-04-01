@@ -8,6 +8,8 @@ PACKAGES=$(shell go list ./...)
 all: deps test build
 
 prepare:
+	@echo "Installing statik..."
+	@go get github.com/rakyll/statik
 	@echo "Installing dep..."
 	@curl -Ls "https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-${OS}-amd64" -o "${GOPATH}/bin/dep"
 	@chmod a+x ${GOPATH}/bin/dep
@@ -24,6 +26,8 @@ test:
 	go test -cover -v $(PACKAGES)
 
 build:
+	@echo "Generating skeleton code..."
+	@go generate
 	@echo "Building the binary..."
 	@go build -a -o api2html
 	@echo "You can now use ./api2html"

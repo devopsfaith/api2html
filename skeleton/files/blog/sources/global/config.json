@@ -1,0 +1,37 @@
+{
+  "robots": true,
+  "sitemap": true,
+  "static_txt_content": [
+    {{# Config.static_txt_files.hello }}"{{ Config.static_txt_files.hello }}"{{/ Config.static_txt_files.hello }}
+  ],
+  "pages":[
+    {
+      "name": "{{ I18N.url.posts }}",
+      "URLPattern": "/{{ I18N.url.posts }}/:post",
+      "BackendURLPattern": "https://jsonplaceholder.typicode.com/posts/:post",
+      "Template": "post",
+      "Layout": "main",
+      "CacheTTL": "3600s"{{# Config.route-posts }},
+      "extra": {{ . }}{{/ Config.route-posts }}
+    },
+    {
+      "name": "{{ I18N.url.home }}",
+      "URLPattern": "/",
+      "BackendURLPattern": "https://jsonplaceholder.typicode.com/posts",
+      "Template": "home",
+      "Layout": "main",
+      "IsArray": true,
+      "CacheTTL": "3600s"{{# Config.route-home }},
+      "extra": {{ . }}{{/ Config.route-home }}
+    }
+  ],
+  {{# Config.templates }}"templates": {{ . }},{{/ Config.templates }}
+	{{# Config.layouts }}"layouts": {{ . }},{{/ Config.layouts }}
+	"extra":{
+		{{# Config.site.iso_lang }}"lang": "{{ Config.site.iso_lang }}",{{/ Config.site.iso_lang }}
+		{{# Config.langs }}"languages": {{ . }},{{/ Config.langs }}
+		{{# Config.site.url_static }}"url_static": "{{ Config.site.url_static }}",{{/ Config.site.url_static}}
+    {{# Config.site.copyright }}"copyright": "{{ Config.site.copyright }}",{{/ Config.site.copyright}}
+    "url_static_revision": 1
+	}
+}
