@@ -23,6 +23,8 @@ test:
 	go test -cover -v ./...
 
 build:
+	@echo "Generating skeleton code..."
+	@go generate
 	@echo "Building the binary..."
 	@go build -a -o api2html
 	@echo "You can now use ./api2html"
