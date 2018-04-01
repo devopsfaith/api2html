@@ -10,7 +10,7 @@ var (
 
 	skelCmd = &cobra.Command{
 		Use:     "skel",
-		Short:   "skeleton command",
+		Short:   "Executes commands to manage/create skeletons",
 		Aliases: []string{"skeleton"},
 		Example: "api2html skel",
 	}
