@@ -8,6 +8,8 @@ GOBASEDIR=src/github.com/devopsfaith/api2html
 
 all: deps test build
 
+docker_all: docker_deps docker_build
+
 prepare:
 	@echo "Installing statik..."
 	@go get github.com/rakyll/statik
@@ -37,8 +39,11 @@ docker: server_build
 	docker build -t devopsfaith/api2html .
 	rm api2html
 
-server_build:
+docker_deps:
 	docker run --rm -it -e "GOPATH=/go" -v "${PWD}:/go/${GOBASEDIR}" -w /go/${GOBASEDIR} lushdigital/docker-golang-dep ensure -v
+
+docker_build:
+	@echo "You must run make deps or make docker_deps"
 	docker run --rm -it -e "GOPATH=/go" -v "${PWD}:/go/${GOBASEDIR}" -w /go/${GOBASEDIR} golang:${GOLANG_VERSION} go build -o api2html
 
 coveralls: all
