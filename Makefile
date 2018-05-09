@@ -4,8 +4,11 @@ GOLANG_VERSION=1.9.3-alpine3.7
 DEP_VERSION=0.4.1
 OS=$(shell uname | tr '[:upper:]' '[:lower:]')
 PACKAGES=$(shell go list ./...)
+GOBASEDIR=src/github.com/devopsfaith/api2html
 
 all: deps test build
+
+docker_all: docker_deps docker_build
 
 prepare:
 	@echo "Installing statik..."
@@ -36,8 +39,12 @@ docker: server_build
 	docker build -t devopsfaith/api2html .
 	rm api2html
 
-server_build: deps
-	docker run --rm -it -e "GOPATH=/go" -v "${PWD}:/go/src/github.com/devopsfaith/api2html" -w /go/src/github.com/devopsfaith/api2html golang:${GOLANG_VERSION} go build -o api2html
+docker_deps:
+	docker run --rm -it -e "GOPATH=/go" -v "${PWD}:/go/${GOBASEDIR}" -w /go/${GOBASEDIR} lushdigital/docker-golang-dep ensure -v
+
+docker_build:
+	@echo "You must run make deps or make docker_deps"
+	docker run --rm -it -e "GOPATH=/go" -v "${PWD}:/go/${GOBASEDIR}" -w /go/${GOBASEDIR} golang:${GOLANG_VERSION} go build -o api2html
 
 coveralls: all
 	go get github.com/mattn/goveralls
