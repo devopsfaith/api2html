@@ -35,7 +35,7 @@ build:
 	@go build -a -o api2html
 	@echo "You can now use ./api2html"
 
-docker: server_build
+docker: docker_build 
 	docker build -t devopsfaith/api2html .
 	rm api2html
 
