@@ -125,7 +125,7 @@ func TestFactory_New_reloadTemplate(t *testing.T) {
 
 	time.Sleep(200 * time.Millisecond)
 
-	// Non-existant file param
+	// Non-existent file param
 	req, _ := http.NewRequest("PUT", "/template/a", nil)
 	resp := httptest.NewRecorder()
 	e.ServeHTTP(resp, req)
