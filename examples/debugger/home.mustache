@@ -6,7 +6,22 @@
 </head>
 
 <body>
-	<h1>Hi there!</h1>
+	<h1>Debug example</h1>
+	<p>This is a simple page that uses a single page and loads data from an external API so you can see how the debug template changes.</p>
+
+	<ul>
+	{{ #Array }}
+		<li><a href="/post/{{ id }}">{{ title }}</a></li>
+	{{ /Array }}
+	</ul>
+
+	{{ #Data }}
+		<h2>{{ title }}</h2>
+		<p>{{ body }}</p>
+
+	{{ /Data }}
+
+
 
    {{ >api2html/debug }}
 </body>

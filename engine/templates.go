@@ -64,7 +64,7 @@ var (
             <p>This page didn't set any parameters in the URL.</p>
         {{ /Params }}
     </div>
-    <h2>Extra data from config(<tt>Extra</tt>)</h2>
+    <h2>Extra data from config (<tt>Extra</tt>)</h2>
     <div class="response">
         {{ #Extra }}
         <pre>{{ . }}</pre>
