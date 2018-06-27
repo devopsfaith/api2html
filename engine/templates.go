@@ -35,73 +35,87 @@ var (
     <pre>{{ String }}</pre>
     </div>
 
-    <h2>Request context params</h2>
+    <h2>Request context parameters (<tt>Context.params</tt>)</h2>
     <div class="response">
         {{ #Context.params }}
             <pre>{{ . }}</pre>
         {{ /Context.params }}
         {{ ^Context.params }}
-            <p>No context parameters set</p>
+            <p>No context parameters set.</p>
         {{ /Context.params }}
     </div>
-    <h2>Request context keys</h2>
+    <h2>Request context keys (<tt>Context.keys</tt>)</h2>
     <div class="response">
 
         {{ #Context.keys }}
             <pre>{{ . }}</pre>
         {{ /Context.keys }}
         {{ ^Context.keys }}
-            <p>No context keys set</p>
+            <p>No context keys set.</p>
         {{ /Context.keys }}
 
     </div>
-    <h2>Request params</h2>
+    <h2>Request parameters (<tt>Params</tt>)</h2>
     <div class="response">
         {{ #Params }}
         <pre>{{ . }}</pre>
         {{ /Params }}
+         {{ ^Params }}
+            <p>This page didn't set any parameters in the URL.</p>
+        {{ /Params }}
     </div>
-    <h2>Extra data</h2>
+    <h2>Extra data from config (<tt>Extra</tt>)</h2>
     <div class="response">
         {{ #Extra }}
         <pre>{{ . }}</pre>
         {{ /Extra }}
+        {{ ^Extra }}
+            <p>The configuration file does not add any extra data.</p>
+        {{ /Extra }}
     </div>
     <h2>Backend response</h2>
     <div class="response">
-        <h3>As object</h3>
+        <h3>Response when object (<tt>Data</tt>)</h3>
         {{ #Data }}
         <pre>{{ . }}</pre>
         {{ /Data }}
+        {{ ^Data }}
+            <p>The backend response did not return an object.</p>
+        {{ /Data }}
 
-        <h3>As array</h3>
+        <h3>Response when array (<tt>Array</tt>)</h3>
         {{ #Array }}
         <pre>{{ . }}</pre>
+        {{ /Array }}
+        {{ ^Array }}
+            <p>The backend response did not return an array or configuration does not set <tt>isArray</tt>.</p>
         {{ /Array }}
     </div>
 </div>
 <style type="text/css">
     .api2html-debug {
-        background-color: #1c1c1d;
-        border: 1px solid #000;
-        color: #fff;
-        font-family: Arial, sans-serif;
+        background-color: #f1f1f1;
+        border: 1px solid #666;
+        color: #333;
+        margin:2rem;
     }
     .api2html-debug .response {
-
         padding: 1em;
     }
     .api2html-debug pre, .api2html-debug strong {
-        color: #00FF00;
+        color: #cb2027;
         font-family: monospace;
     }
 
-    .api2html-debug h1, h2, h3 {
+    .api2html-debug h1 {
+        text-align: center;
+    }
+
+    .api2html-debug h1, .api2html-debug h2, .api2html-debug h3 {
         margin: 0;
-        background-color: #333;
-        color: #fff;
+        background-color: #e0e0e0;
+        color: #cb2027;
         padding:0.5em;
-        border-left: 4px solid #FF473B;
     }
 </style>`
 )

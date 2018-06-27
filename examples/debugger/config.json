@@ -7,37 +7,28 @@
 			"CacheTTL": "1s"
 		},
 		{
-			"name": "static",
-			"URLPattern": "/static",
-			"Template": "static",
-			"CacheTTL": "1s",
-			"extra": {
-				"metadata_title":"API2HTML static page debugger"
-			}
-		},
-		{
-			"name": "dynamic",
-			"URLPattern": "/dynamic/object/:post",
+			"name": "post",
+			"URLPattern": "/post/:post",
 			"BackendURLPattern": "https://jsonplaceholder.typicode.com/posts/:post",
-			"Template": "dynamic",
+			"Template": "post",
 			"CacheTTL": "1s",
 			"extra": {
-				"metadata_title":"API2HTML dynamic page debugger"
+				"metadata_title":"API2HTML post page debugger"
 			}
 		},
 		{
-			"name": "dynamic",
-			"URLPattern": "/dynamic/lists",
+			"name": "post",
+			"URLPattern": "/posts",
 			"BackendURLPattern": "https://jsonplaceholder.typicode.com/posts",
-			"Template": "dynamic",
+			"Template": "post",
       		"IsArray": true,
 			"CacheTTL": "1s",
 			"extra": {
-				"metadata_title":"API2HTML dynamic page debugger"
+				"metadata_title":"API2HTML post page debugger"
 			}
 		}
 	],
-	"templates": {"home":"home.mustache","static":"home.mustache","dynamic":"home.mustache"},
+	"templates": {"home":"home.mustache","post":"home.mustache"},
 	"extra":{
 		"lang": "en-US",
 		"metadata_title": "API2HTML debugger"
