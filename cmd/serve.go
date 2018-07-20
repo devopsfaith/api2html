@@ -29,7 +29,7 @@ var (
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.json", "Path to the configuration filename")
+	serveCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "api2html.conf", "Path to the configuration filename")
 	serveCmd.PersistentFlags().BoolVarP(&devel, "devel", "d", false, "Enable the devel")
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Listen port")
 }
