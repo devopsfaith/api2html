@@ -1,5 +1,5 @@
 
-# ![api2html](https://raw.githubusercontent.com/devopsfaith/api2html.com/master/img/api2html.png) API2HTML
+![api2html](https://raw.githubusercontent.com/devopsfaith/api2html.com/master/img/api2html-on-white.png)
 
 [![Build Status](https://travis-ci.org/devopsfaith/api2html.svg?branch=master)](https://travis-ci.org/devopsfaith/api2html) [![Go Report Card](https://goreportcard.com/badge/github.com/devopsfaith/api2html)](https://goreportcard.com/report/github.com/devopsfaith/api2html) [![Coverage Status](https://coveralls.io/repos/github/devopsfaith/api2html/badge.svg?branch=master)](https://coveralls.io/github/devopsfaith/api2html?branch=master) [![GoDoc](https://godoc.org/github.com/devopsfaith/api2html?status.svg)](https://godoc.org/github.com/devopsfaith/api2html)
 
